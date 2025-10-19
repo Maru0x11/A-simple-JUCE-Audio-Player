@@ -1,27 +1,27 @@
-﻿#include "PlayerAudio.h"
+#include "PlayerAudio.h"
 
 PlayerAudio::PlayerAudio() {
-	formatManager.registerBasicFormats();
+    formatManager.registerBasicFormats();
 }
 
-PlayerAudio::~PlayerAudio() 
+PlayerAudio::~PlayerAudio()
 {
-	releaseResources();
+    releaseResources();
 }
 void PlayerAudio::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
-	transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
+    transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 void PlayerAudio::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
-	transportSource.getNextAudioBlock(bufferToFill);
+    transportSource.getNextAudioBlock(bufferToFill);
 }
 void PlayerAudio::releaseResources()
 {
-	transportSource.releaseResources();
+    transportSource.releaseResources();
 }
 bool PlayerAudio::LoadFile(const juce::File& file) {
-    
+
     if (auto* reader = formatManager.createReaderFor(file))
     {
         // Disconnect old source first
@@ -48,10 +48,12 @@ void PlayerAudio::stop()
     transportSource.stop();
     transportSource.setPosition(0.0);
 }
+
 void PlayerAudio::setGain(float gain)
 {
     transportSource.setGain(gain);
 }
+
 void PlayerAudio::setPosition(double pos)
 {
     transportSource.setPosition(pos);
@@ -63,4 +65,27 @@ double PlayerAudio::getPosition() const
 double PlayerAudio::getLength() const
 {
     return transportSource.getLengthInSeconds();
+}
+
+void PlayerAudio::setGainFromGUI(float gain)
+{
+    if (!isMuted)
+    {
+        previousVolume = gain;
+    }
+    setGain(gain);
+}
+
+void PlayerAudio::toggleMute()
+{
+    if (isMuted)
+    {
+        setGain(previousVolume);
+        isMuted = false;
+    }
+    else
+    {
+        setGain(0.0f);
+        isMuted = true;
+    }
 }
