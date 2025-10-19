@@ -17,10 +17,16 @@ public:
     void setPosition(double pos);
     double getPosition() const;
     double getLength() const;
+    void toggleMute();
+    void setGainFromGUI(float gain);
+
 private:
     juce::AudioFormatManager formatManager;
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
     juce::AudioTransportSource transportSource;
+    float previousVolume = 0.5f;
+    bool isMuted = false;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerAudio)
 };
