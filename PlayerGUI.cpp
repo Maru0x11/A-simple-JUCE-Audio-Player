@@ -1,6 +1,6 @@
 #include "PlayerGUI.h"
 PlayerGUI::PlayerGUI() {
-	for (auto* btn : { &loadButton, &playButton, &stopButton })
+	for (auto* btn : { &loadButton, &playButton, &stopButton, &muteButton }) 
 	{
 		addAndMakeVisible(btn);
 		btn->addListener(this);
@@ -30,6 +30,7 @@ void PlayerGUI::resized() {
 	loadButton.setBounds(18, y, 80, 30);
 	playButton.setBounds(100, y, 80, 30);
 	stopButton.setBounds(198, y, 88, 30);
+    muteButton.setBounds(296, y, 80, 30); 
 	volumeslider.setBounds(10, 60, getWidth() - 20, 30);
 }
 void PlayerGUI::buttonClicked(juce::Button* button)
@@ -56,9 +57,13 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 	{
 		playerAudio.stop();
 	}
+    else if (button == &muteButton)
+    {
+        playerAudio.toggleMute();
+    }
 }
 void PlayerGUI::sliderValueChanged(juce::Slider* slider)
 {
 	if (slider == &volumeslider)
-		playerAudio.setGain((float)volumeslider.getValue());
+		playerAudio.setGainFromGUI((float)volumeslider.getValue()); 
 }
