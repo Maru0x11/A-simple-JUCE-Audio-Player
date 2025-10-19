@@ -21,6 +21,7 @@ private:
     juce::TextButton playButton{ "Play" };
     juce::TextButton stopButton{ "Stop" };
     juce::Slider volumeslider;
+    juce::TextButton muteButton{ "Mute" };
 
     std::unique_ptr<juce::FileChooser> fileChooser;
     // Event handlers
