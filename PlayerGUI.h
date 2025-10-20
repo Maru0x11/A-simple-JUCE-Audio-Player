@@ -20,8 +20,8 @@ private:
     PlayerAudio playerAudio;
     // GUI elements
     juce::TextButton loadButton{ "Load" };
-    /*juce::TextButton playButton{ "Play" };
-    juce::TextButton stopButton{ "Stop" };*/
+    juce::TextButton playButton{ "Play" };
+    juce::TextButton stopButton{ "Stop" };
     juce::Slider volumeslider;
     juce::TextButton muteButton{ "Mute" };
     juce::ShapeButton playPauseButton, goToStartButton, goToEndButton;

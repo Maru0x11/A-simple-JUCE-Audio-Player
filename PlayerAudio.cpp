@@ -44,15 +44,15 @@ bool PlayerAudio::LoadFile(const juce::File& file) {
     }
     return false;
 }
-//void PlayerAudio::play()
-//{
-//    transportSource.start();
-//}
-//void PlayerAudio::stop()
-//{
-//    transportSource.stop();
-//    transportSource.setPosition(0.0);
-//}
+void PlayerAudio::play()
+{
+    transportSource.start();
+}
+void PlayerAudio::stop()
+{
+    transportSource.stop();
+    transportSource.setPosition(0.0);
+}
 
 void PlayerAudio::setGain(float gain)
 {

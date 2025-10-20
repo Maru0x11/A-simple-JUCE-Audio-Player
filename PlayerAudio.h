@@ -11,8 +11,8 @@ public:
     void releaseResources();
 
     bool LoadFile(const juce::File& file);
-    //void play();
-    //void stop();
+    void play();
+    void stop();
     void setGain(float gain);
     void setPosition(double pos);
     double getPosition() const;

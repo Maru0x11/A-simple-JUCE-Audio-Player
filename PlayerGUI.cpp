@@ -6,7 +6,11 @@ goToStartButton(createShapeButton("goToStartButton")),
 goToEndButton(createShapeButton("goToEndButton"))
 {
 	std::array<juce::Button*, 7> buttons = {
-		&loadButton, /*&playButton, &stopButton,*/ &muteButton,
+<<<<<<< HEAD
+		&loadButton, &playButton, &stopButton, &muteButton,
+=======
+		&loadButton, &playButton, &stopButton, &muteButton,
+>>>>>>> sara
 		&playPauseButton, &goToStartButton, &goToEndButton
 	};
 
@@ -46,8 +50,13 @@ void PlayerGUI::releaseResources()
 void PlayerGUI::resized() {
 	int y = 10;
 	loadButton.setBounds(18, y, 80, 30);
-	/*playButton.setBounds(100, y, 80, 30);
-	stopButton.setBounds(198, y, 88, 30);*/
+<<<<<<< HEAD
+	playButton.setBounds(100, y, 80, 30);
+	stopButton.setBounds(198, y, 88, 30);
+=======
+	playButton.setBounds(100, y, 80, 30);
+	stopButton.setBounds(198, y, 88, 30);
+>>>>>>> sara
     muteButton.setBounds(296, y, 80, 30);
 	volumeslider.setBounds(10, 60, getWidth() - 20, 30);
 
@@ -71,14 +80,14 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 				playerAudio.LoadFile(file);
 		});
 	}
-	/*else if (button == &playButton)
+	else if (button == &playButton)
 	{
 		playerAudio.play();
 	}
 	else if (button == &stopButton)
 	{
 		playerAudio.stop();
-	}*/
+	}
     else if (button == &muteButton)
     {
         playerAudio.toggleMute();
