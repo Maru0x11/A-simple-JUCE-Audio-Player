@@ -21,6 +21,7 @@ public:
     void setGainFromGUI(float gain);
     void togglePlayer();
     bool getPlayerState();
+    void setPlayerState(bool state);
 private:
     juce::AudioFormatManager formatManager;
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;

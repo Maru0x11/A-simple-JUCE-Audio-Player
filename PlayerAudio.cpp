@@ -110,3 +110,6 @@ void PlayerAudio::togglePlayer() {
 bool PlayerAudio::getPlayerState() {
     return isPlaying;
 }
+void PlayerAudio::setPlayerState(bool state) {
+    isPlaying = state;
+}
