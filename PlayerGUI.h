@@ -14,14 +14,17 @@ public:
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
     void releaseResources();
+    juce::ShapeButton createShapeButton(const juce::String& name);
+    juce::Path CreateButtonShape(const juce::String& name);
 private:
     PlayerAudio playerAudio;
     // GUI elements
     juce::TextButton loadButton{ "Load" };
-    juce::TextButton playButton{ "Play" };
-    juce::TextButton stopButton{ "Stop" };
+    /*juce::TextButton playButton{ "Play" };
+    juce::TextButton stopButton{ "Stop" };*/
     juce::Slider volumeslider;
     juce::TextButton muteButton{ "Mute" };
+    juce::ShapeButton playPauseButton, goToStartButton, goToEndButton;
 
     std::unique_ptr<juce::FileChooser> fileChooser;
     // Event handlers

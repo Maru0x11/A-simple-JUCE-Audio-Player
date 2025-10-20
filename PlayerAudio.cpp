@@ -6,7 +6,9 @@ PlayerAudio::PlayerAudio() {
 
 PlayerAudio::~PlayerAudio()
 {
-    releaseResources();
+    // Important: Clear the transport source before destroying readerSource
+    transportSource.setSource(nullptr);
+    readerSource.reset();
 }
 void PlayerAudio::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
@@ -21,16 +23,19 @@ void PlayerAudio::releaseResources()
     transportSource.releaseResources();
 }
 bool PlayerAudio::LoadFile(const juce::File& file) {
+    // Stop and clear the transport source first
+    transportSource.stop();
+    transportSource.setSource(nullptr);
+
+    // Reset the reader source (this will delete the reader)
+    readerSource.reset();
 
     if (auto* reader = formatManager.createReaderFor(file))
     {
-        // Disconnect old source first
-        transportSource.stop();
-        transportSource.setSource(nullptr);
-        readerSource.reset();
         // Create new reader source
         readerSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
-        // Attach safely
+
+        // Connect the new source
         transportSource.setSource(readerSource.get(),
             0,
             nullptr,
@@ -39,15 +44,15 @@ bool PlayerAudio::LoadFile(const juce::File& file) {
     }
     return false;
 }
-void PlayerAudio::play()
-{
-    transportSource.start();
-}
-void PlayerAudio::stop()
-{
-    transportSource.stop();
-    transportSource.setPosition(0.0);
-}
+//void PlayerAudio::play()
+//{
+//    transportSource.start();
+//}
+//void PlayerAudio::stop()
+//{
+//    transportSource.stop();
+//    transportSource.setPosition(0.0);
+//}
 
 void PlayerAudio::setGain(float gain)
 {
@@ -88,4 +93,20 @@ void PlayerAudio::toggleMute()
         setGain(0.0f);
         isMuted = true;
     }
+}
+void PlayerAudio::togglePlayer() {
+    if (isPlaying) {
+        isPlaying = false;
+        transportSource.stop();
+        previousPosition = transportSource.getCurrentPosition();
+        transportSource.setPosition(0.0);
+    }
+    else {
+        isPlaying = true;
+        transportSource.setPosition(previousPosition);
+        transportSource.start();
+    }
+}
+bool PlayerAudio::getPlayerState() {
+    return isPlaying;
 }
