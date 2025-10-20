@@ -89,3 +89,19 @@ void PlayerAudio::toggleMute()
         isMuted = true;
     }
 }
+void PlayerAudio::togglePlayer() {
+    if (isPlaying) {
+        isPlaying = false;
+        transportSource.stop();
+        previousPosition = transportSource.getCurrentPosition();
+        transportSource.setPosition(0.0);
+    }
+    else {
+        isPlaying = true;
+        transportSource.setPosition(previousPosition);
+        transportSource.start();
+    }
+}
+bool PlayerAudio::getPlayerState() {
+    return isPlaying;
+}
