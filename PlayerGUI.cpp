@@ -1,13 +1,14 @@
 #include "PlayerGUI.h"
 
-PlayerGUI::PlayerGUI():
-playPauseButton(createShapeButton("playPauseButton")),
-goToStartButton(createShapeButton("goToStartButton")),
-goToEndButton(createShapeButton("goToEndButton"))
+PlayerGUI::PlayerGUI() :
+	playPauseButton(createShapeButton("playPauseButton")),
+	goToStartButton(createShapeButton("goToStartButton")),
+	goToEndButton(createShapeButton("goToEndButton"))
 {
-	std::array<juce::Button*, 7> buttons = {
+	std::array<juce::Button*, 8> buttons = {
 		&loadButton, &playButton, &stopButton, &muteButton,
-		&playPauseButton, &goToStartButton, &goToEndButton
+		&playPauseButton, &goToStartButton, &goToEndButton,
+		&loopButton
 	};
 
 	for (auto* btn : buttons)
@@ -24,6 +25,9 @@ goToEndButton(createShapeButton("goToEndButton"))
 	playPauseButton.setShape(CreateButtonShape("play"), true, true, true);
 	goToStartButton.setShape(CreateButtonShape("goToStart"), true, true, true);
 	goToEndButton.setShape(CreateButtonShape("goToEnd"), true, true, true);
+
+	loopButton.setButtonText("Loop: OFF");
+
 
 	playPauseButton.addListener(this);
 	goToStartButton.addListener(this);
@@ -48,13 +52,14 @@ void PlayerGUI::resized() {
 	loadButton.setBounds(18, y, 80, 30);
 	playButton.setBounds(100, y, 80, 30);
 	stopButton.setBounds(198, y, 88, 30);
-    muteButton.setBounds(296, y, 80, 30);
+	muteButton.setBounds(296, y, 80, 30);
+	loopButton.setBounds(385, y, 80, 30);
 	volumeslider.setBounds(10, 60, getWidth() - 20, 30);
 
-	playPauseButton.setBounds(getWidth() / 3, getHeight() / 3,30,30);
-	goToStartButton.setBounds(getWidth() / 3-50, getHeight() / 3+5, 20, 20);
-	goToEndButton.setBounds(getWidth() / 3+50, getHeight() / 3+5,20, 20);
-}	
+	playPauseButton.setBounds(getWidth() / 3, getHeight() / 3, 30, 30);
+	goToStartButton.setBounds(getWidth() / 3 - 50, getHeight() / 3 + 5, 20, 20);
+	goToEndButton.setBounds(getWidth() / 3 + 50, getHeight() / 3 + 5, 20, 20);
+}
 void PlayerGUI::buttonClicked(juce::Button* button)
 {
 	if (button == &loadButton)
@@ -65,11 +70,11 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 		fileChooser->launchAsync(
 			juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
 			[this](const juce::FileChooser& fc)
-		{
-			auto file = fc.getResult();
-			if (file.existsAsFile())
-				playerAudio.LoadFile(file);
-		});
+			{
+				auto file = fc.getResult();
+				if (file.existsAsFile())
+					playerAudio.LoadFile(file);
+			});
 	}
 	else if (button == &playButton)
 	{
@@ -79,9 +84,9 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 	{
 		playerAudio.stop();
 	}
-    else if (button == &muteButton)
-    {
-        playerAudio.toggleMute();
+	else if (button == &muteButton)
+	{
+		playerAudio.toggleMute();
 	}
 	else if (button == &playPauseButton) {
 		playerAudio.togglePlayer();
@@ -103,16 +108,25 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 		playPauseButton.setBounds(getWidth() / 3, getHeight() / 3, 30, 30);
 		playerAudio.setPlayerState(false);
 	}
+	else if (button == &loopButton) {
+
+		playerAudio.toggleLooping();
+
+		if (playerAudio.getLoopState())
+			loopButton.setButtonText("Loop: ON");
+		else
+			loopButton.setButtonText("Loop: OFF");
+	}
 }
 void PlayerGUI::sliderValueChanged(juce::Slider* slider)
 {
 	if (slider == &volumeslider)
-		playerAudio.setGainFromGUI((float)volumeslider.getValue()); 
+		playerAudio.setGainFromGUI((float)volumeslider.getValue());
 }
 juce::ShapeButton PlayerGUI::createShapeButton(const juce::String& name) {
 	return juce::ShapeButton(
-		name, juce::Colours::seashell, 
-		juce::Colours::black, 
+		name, juce::Colours::seashell,
+		juce::Colours::black,
 		juce::Colours::bisque);
 }
 juce::Path PlayerGUI::CreateButtonShape(const juce::String& name) {
@@ -128,10 +142,11 @@ juce::Path PlayerGUI::CreateButtonShape(const juce::String& name) {
 		buttonShape.addRectangle(0.2f, 0.2f, 0.15f, 0.6f);
 		buttonShape.addTriangle(0.5f, 0.5f, 0.8f, 0.8f, 0.8f, 0.2f);
 	}
-	else if(name == "goToEnd") {
+	else if (name == "goToEnd") {
 		buttonShape.addTriangle(0.2f, 0.2f, 0.5f, 0.5f, 0.2f, 0.8f);
-        buttonShape.addRectangle(0.65f, 0.2f, 0.15f, 0.6f);
+		buttonShape.addRectangle(0.65f, 0.2f, 0.15f, 0.6f);
 	}
 	return buttonShape;
 }
+
 

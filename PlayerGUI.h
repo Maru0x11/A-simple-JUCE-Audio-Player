@@ -1,9 +1,10 @@
 #pragma once
 #include <JuceHeader.h>
-#include "PlayerAudio.h";
+#include "PlayerAudio.h"
+
 class PlayerGUI : public juce::Component,
-	public juce::Button::Listener,
-	public juce::Slider::Listener
+    public juce::Button::Listener,
+    public juce::Slider::Listener
 {
 public:
     PlayerGUI();
@@ -24,6 +25,7 @@ private:
     juce::TextButton stopButton{ "Stop" };
     juce::Slider volumeslider;
     juce::TextButton muteButton{ "Mute" };
+	juce::TextButton loopButton{ "Loop: OFF" };
     juce::ShapeButton playPauseButton, goToStartButton, goToEndButton;
 
     std::unique_ptr<juce::FileChooser> fileChooser;

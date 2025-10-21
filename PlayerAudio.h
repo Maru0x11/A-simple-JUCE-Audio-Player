@@ -1,5 +1,6 @@
 #pragma once
 #include <JuceHeader.h>
+
 class PlayerAudio
 {
 public:
@@ -22,6 +23,8 @@ public:
     void togglePlayer();
     bool getPlayerState();
     void setPlayerState(bool state);
+    void toggleLooping();
+    bool getLoopState() const;
 private:
     juce::AudioFormatManager formatManager;
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
@@ -30,6 +33,7 @@ private:
     bool isMuted = false;
     float previousPosition = 0.0f;
     bool isPlaying = false;
+    bool isLooping = false;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerAudio)
 };
 
