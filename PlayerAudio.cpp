@@ -113,3 +113,14 @@ bool PlayerAudio::getPlayerState() {
 void PlayerAudio::setPlayerState(bool state) {
     isPlaying = state;
 }
+
+void PlayerAudio::toggleLooping()
+{
+    isLooping = !isLooping;
+    transportSource.setLooping(isLooping);
+}
+
+bool PlayerAudio::getLoopState() const
+{
+    return isLooping;
+}
