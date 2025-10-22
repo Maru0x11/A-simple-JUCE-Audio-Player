@@ -17,12 +17,20 @@ void PlayerAudio::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 void PlayerAudio::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
     transportSource.getNextAudioBlock(bufferToFill);
+
+	// if you've reached to the end of the song and looping is enabled, restart playback
+
+    if (isLooping && transportSource.getCurrentPosition() >= transportSource.getLengthInSeconds()) {
+        transportSource.setPosition(0.0);
+        transportSource.start();
+    }
 }
 void PlayerAudio::releaseResources()
 {
     transportSource.releaseResources();
 }
 bool PlayerAudio::LoadFile(const juce::File& file) {
+
     // Stop and clear the transport source first
     transportSource.stop();
     transportSource.setSource(nullptr);
@@ -117,7 +125,6 @@ void PlayerAudio::setPlayerState(bool state) {
 void PlayerAudio::toggleLooping()
 {
     isLooping = !isLooping;
-    transportSource.setLooping(isLooping);
 }
 
 bool PlayerAudio::getLoopState() const
