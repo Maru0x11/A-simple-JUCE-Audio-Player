@@ -5,8 +5,8 @@ playPauseButton(createShapeButton("playPauseButton")),
 goToStartButton(createShapeButton("goToStartButton")),
 goToEndButton(createShapeButton("goToEndButton"))
 {
-	std::array<juce::Button*, 7> buttons = {
-		&loadButton, &playButton, &stopButton, &muteButton,
+	std::array<juce::Button*, 5> buttons = {
+		&loadButton, &muteButton,
 		&playPauseButton, &goToStartButton, &goToEndButton
 	};
 
@@ -28,6 +28,17 @@ goToEndButton(createShapeButton("goToEndButton"))
 	playPauseButton.addListener(this);
 	goToStartButton.addListener(this);
 	goToEndButton.addListener(this);
+
+	metadataTextEditor.setColour(juce::TextEditor::textColourId, juce::Colours::black);
+	metadataTextEditor.setColour(juce::TextEditor::backgroundColourId, juce::Colours::grey);
+	metadataTextEditor.setMultiLine(true);
+	metadataTextEditor.setReadOnly(true);
+	metadataTextEditor.setFont(juce::Font(juce::Font(14.0f)));
+	metadataTextEditor.setScrollbarsShown(true);
+	metadataTextEditor.setCaretVisible(false);
+	metadataViewPort.setScrollBarsShown(true, true);
+	addAndMakeVisible(metadataTextEditor);
+	addAndMakeVisible(metadataViewPort);
 }
 
 PlayerGUI::~PlayerGUI() {}
@@ -45,15 +56,14 @@ void PlayerGUI::releaseResources()
 }
 void PlayerGUI::resized() {
 	int y = 10;
-	loadButton.setBounds(18, y, 80, 30);
-	playButton.setBounds(100, y, 80, 30);
-	stopButton.setBounds(198, y, 88, 30);
-    muteButton.setBounds(296, y, 80, 30);
-	volumeslider.setBounds(10, 60, getWidth() - 20, 30);
+	loadButton.setBounds(y, y, 80, 30);
+    muteButton.setBounds(getWidth()-80-y, y, 80, 30);
+	volumeslider.setBounds(y, 60, getWidth() - 20, 30);
 
-	playPauseButton.setBounds(getWidth() / 3, getHeight() / 3,30,30);
-	goToStartButton.setBounds(getWidth() / 3-50, getHeight() / 3+5, 20, 20);
-	goToEndButton.setBounds(getWidth() / 3+50, getHeight() / 3+5,20, 20);
+	playPauseButton.setBounds(getWidth() / 2-15, y,30,30);
+	goToStartButton.setBounds(getWidth() / 2-55, y + 5, 20, 20);
+	goToEndButton.setBounds(getWidth() / 2+35, y + 5,20, 20);
+
 }	
 void PlayerGUI::buttonClicked(juce::Button* button)
 {
@@ -67,17 +77,24 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 			[this](const juce::FileChooser& fc)
 		{
 			auto file = fc.getResult();
-			if (file.existsAsFile())
-				playerAudio.LoadFile(file);
+			if (file.existsAsFile()) {
+				if (playerAudio.LoadFile(file)) {
+					metadataText = playerAudio.getMeta();
+					
+					
+					metadataTextEditor.setText(metadataText);
+					metadataTextEditor.setSize(getWidth() / 2, getHeight() / 2);
+					//metadataTextEditor.setBounds(10, 80, getWidth() / 2 - 20, getHeight() / 2 - 20);
+
+					metadataViewPort.setViewedComponent(&metadataTextEditor, false);
+					
+					metadataViewPort.setBounds(10, 100, getWidth() / 2 - 20, getHeight() / 2 - 20);
+					
+				}
+			}
+				
 		});
-	}
-	else if (button == &playButton)
-	{
-		playerAudio.play();
-	}
-	else if (button == &stopButton)
-	{
-		playerAudio.stop();
+
 	}
     else if (button == &muteButton)
     {
@@ -87,22 +104,31 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 		playerAudio.togglePlayer();
 		if (playerAudio.getPlayerState()) {
 			playPauseButton.setShape(CreateButtonShape("pause"), true, true, true);
-			playPauseButton.setBounds(getWidth() / 3, getHeight() / 3, 30, 30);
+			playPauseButton.setBounds(getWidth() / 2 - 15, 10, 30, 30);
 		}
 		else {
 			playPauseButton.setShape(CreateButtonShape("play"), true, true, true);
-			playPauseButton.setBounds(getWidth() / 3, getHeight() / 3, 30, 30);
+			playPauseButton.setBounds(getWidth() / 2 - 15, 10, 30, 30);
 		}
 	}
 	else if (button == &goToStartButton) {
 		playerAudio.setPosition(0.0f);
+		playerAudio.setPreviousPosition(0.0f);
 	}
 	else if (button == &goToEndButton) {
 		playerAudio.setPosition(playerAudio.getLength());
+		playerAudio.setPreviousPosition(0.0f);
 		playPauseButton.setShape(CreateButtonShape("play"), true, true, true);
-		playPauseButton.setBounds(getWidth() / 3, getHeight() / 3, 30, 30);
+		playPauseButton.setBounds(getWidth() / 2 - 15, 10, 30, 30);
 		playerAudio.setPlayerState(false);
+	}/*else if (button == &playButton)
+	{
+		playerAudio.play();
 	}
+	else if (button == &stopButton)
+	{
+		playerAudio.stop();
+	}*/
 }
 void PlayerGUI::sliderValueChanged(juce::Slider* slider)
 {
