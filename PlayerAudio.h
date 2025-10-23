@@ -11,8 +11,6 @@ public:
     void releaseResources();
 
     bool LoadFile(const juce::File& file);
-    void play();
-    void stop();
     void setGain(float gain);
     void setPosition(double pos);
     double getPosition() const;
@@ -21,7 +19,10 @@ public:
     void setGainFromGUI(float gain);
     void togglePlayer();
     bool getPlayerState();
+    void setPreviousPosition(float pos);
     void setPlayerState(bool state);
+    juce::String getMeta();
+    //void extractMeta(juce::AudioFormatReader* reader, const juce::File& file);
 private:
     juce::AudioFormatManager formatManager;
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
@@ -30,6 +31,9 @@ private:
     bool isMuted = false;
     float previousPosition = 0.0f;
     bool isPlaying = false;
+    juce::String metadataText;
+    juce::StringPairArray metadata;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerAudio)
 };
 
