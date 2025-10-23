@@ -30,7 +30,6 @@ private:
     juce::String metadataText;
     juce::Viewport metadataViewPort;
     std::unique_ptr<juce::FileChooser> fileChooser;
-    // Event handlers
     void buttonClicked(juce::Button* button) override;
     void sliderValueChanged(juce::Slider* slider) override;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerGUI)
