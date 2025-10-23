@@ -5,8 +5,8 @@ PlayerGUI::PlayerGUI() :
 	goToStartButton(createShapeButton("goToStartButton")),
 	goToEndButton(createShapeButton("goToEndButton"))
 {
-	std::array<juce::Button*, 8> buttons = {
-		&loadButton, &playButton, &stopButton, &muteButton,
+	std::array<juce::Button*, 6> buttons = {
+		&loadButton, &muteButton,
 		&playPauseButton, &goToStartButton, &goToEndButton,
 		&loopButton
 	};
@@ -63,7 +63,6 @@ void PlayerGUI::resized() {
 	loadButton.setBounds(y, y, 80, 30);
     muteButton.setBounds(getWidth()-80-y, y, 80, 30);
 	volumeslider.setBounds(y, 60, getWidth() - 20, 30);
-	stopButton.setBounds(198, y, 88, 30);
 	muteButton.setBounds(296, y, 80, 30);
 	loopButton.setBounds(385, y, 80, 30);
 	volumeslider.setBounds(10, 60, getWidth() - 20, 30);
@@ -129,9 +128,6 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 		playPauseButton.setShape(CreateButtonShape("play"), true, true, true);
 		playPauseButton.setBounds(getWidth() / 2 - 15, 10, 30, 30);
 		playerAudio.setPlayerState(false);
-	}/*else if (button == &playButton)
-	{
-		playerAudio.play();
 	}
 	else if (button == &loopButton) {
 
