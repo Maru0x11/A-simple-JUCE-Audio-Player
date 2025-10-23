@@ -32,17 +32,6 @@ PlayerGUI::PlayerGUI() :
 	playPauseButton.addListener(this);
 	goToStartButton.addListener(this);
 	goToEndButton.addListener(this);
-
-	metadataTextEditor.setColour(juce::TextEditor::textColourId, juce::Colours::black);
-	metadataTextEditor.setColour(juce::TextEditor::backgroundColourId, juce::Colours::grey);
-	metadataTextEditor.setMultiLine(true);
-	metadataTextEditor.setReadOnly(true);
-	metadataTextEditor.setFont(juce::Font(juce::Font(14.0f)));
-	metadataTextEditor.setScrollbarsShown(true);
-	metadataTextEditor.setCaretVisible(false);
-	metadataViewPort.setScrollBarsShown(true, true);
-	addAndMakeVisible(metadataTextEditor);
-	addAndMakeVisible(metadataViewPort);
 }
 
 PlayerGUI::~PlayerGUI() {}
@@ -61,17 +50,14 @@ void PlayerGUI::releaseResources()
 void PlayerGUI::resized() {
 	int y = 10;
 	loadButton.setBounds(y, y, 80, 30);
-    muteButton.setBounds(getWidth()-80-y, y, 80, 30);
-	volumeslider.setBounds(y, 60, getWidth() - 20, 30);
-	muteButton.setBounds(296, y, 80, 30);
-	loopButton.setBounds(385, y, 80, 30);
-	volumeslider.setBounds(10, 60, getWidth() - 20, 30);
+	muteButton.setBounds(y, 50, 80, 30);
+	volumeslider.setBounds(100, 60, getWidth() - 20, 30);
+	loopButton.setBounds(y, 90, 80, 30);
 
-	playPauseButton.setBounds(getWidth() / 2-15, y,30,30);
-	goToStartButton.setBounds(getWidth() / 2-55, y + 5, 20, 20);
-	goToEndButton.setBounds(getWidth() / 2+35, y + 5,20, 20);
-
-}	
+	playPauseButton.setBounds(getWidth() / 2 - 15, y, 30, 30);
+	goToStartButton.setBounds(getWidth() / 2 - 55, y + 5, 20, 20);
+	goToEndButton.setBounds(getWidth() / 2 + 35, y + 5, 20, 20);
+}
 void PlayerGUI::buttonClicked(juce::Button* button)
 {
 	if (button == &loadButton)
@@ -82,26 +68,11 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 		fileChooser->launchAsync(
 			juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
 			[this](const juce::FileChooser& fc)
-		{
-			auto file = fc.getResult();
-			if (file.existsAsFile()) {
-				if (playerAudio.LoadFile(file)) {
-					metadataText = playerAudio.getMeta();
-					
-					
-					metadataTextEditor.setText(metadataText);
-					metadataTextEditor.setSize(getWidth() / 2, getHeight() / 2);
-					//metadataTextEditor.setBounds(10, 80, getWidth() / 2 - 20, getHeight() / 2 - 20);
-
-					metadataViewPort.setViewedComponent(&metadataTextEditor, false);
-					
-					metadataViewPort.setBounds(10, 100, getWidth() / 2 - 20, getHeight() / 2 - 20);
-					
-				}
-			}
-				
-		});
-
+			{
+				auto file = fc.getResult();
+				if (file.existsAsFile())
+					playerAudio.LoadFile(file);
+			});
 	}
 	else if (button == &muteButton)
 	{
@@ -109,14 +80,7 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 	}
 	else if (button == &playPauseButton) {
 		playerAudio.togglePlayer();
-		if (playerAudio.getPlayerState()) {
-			playPauseButton.setShape(CreateButtonShape("pause"), true, true, true);
-			playPauseButton.setBounds(getWidth() / 2 - 15, 10, 30, 30);
-		}
-		else {
-			playPauseButton.setShape(CreateButtonShape("play"), true, true, true);
-			playPauseButton.setBounds(getWidth() / 2 - 15, 10, 30, 30);
-		}
+		changePlayer();
 	}
 	else if (button == &goToStartButton) {
 		playerAudio.setPosition(0.0f);
@@ -133,10 +97,13 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 
 		playerAudio.toggleLooping();
 
-		if (playerAudio.getLoopState())
+		if (playerAudio.getLoopState()) {
 			loopButton.setButtonText("Loop: ON");
-		else
+		}
+		else {
 			loopButton.setButtonText("Loop: OFF");
+		}
+
 	}
 }
 void PlayerGUI::sliderValueChanged(juce::Slider* slider)
@@ -169,5 +136,14 @@ juce::Path PlayerGUI::CreateButtonShape(const juce::String& name) {
 	}
 	return buttonShape;
 }
+void PlayerGUI::changePlayer() {
+	if (playerAudio.getPlayerState()) {
+		playPauseButton.setShape(CreateButtonShape("pause"), true, true, true);
+		playPauseButton.setBounds(getWidth() / 2 - 15, 10, 30, 30);
 
-
+	}
+	else {
+		playPauseButton.setShape(CreateButtonShape("play"), true, true, true);
+		playPauseButton.setBounds(getWidth() / 2 - 15, 10, 30, 30);
+	}
+}
