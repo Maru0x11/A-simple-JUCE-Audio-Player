@@ -17,17 +17,18 @@ public:
     void releaseResources();
     juce::ShapeButton createShapeButton(const juce::String& name);
     juce::Path CreateButtonShape(const juce::String& name);
+
 private:
     PlayerAudio playerAudio;
     // GUI elements
     juce::TextButton loadButton{ "Load" };
-    juce::TextButton playButton{ "Play" };
-    juce::TextButton stopButton{ "Stop" };
     juce::Slider volumeslider;
     juce::TextButton muteButton{ "Mute" };
 	juce::TextButton loopButton{ "Loop" };
     juce::ShapeButton playPauseButton, goToStartButton, goToEndButton;
-
+    juce::TextEditor metadataTextEditor;
+    juce::String metadataText;
+    juce::Viewport metadataViewPort;
     std::unique_ptr<juce::FileChooser> fileChooser;
     // Event handlers
     void buttonClicked(juce::Button* button) override;
