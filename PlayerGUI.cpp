@@ -41,7 +41,12 @@ void PlayerGUI::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 }
 void PlayerGUI::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
-	playerAudio.getNextAudioBlock(bufferToFill);
+	if (playerAudio.getNextAudioBlock(bufferToFill)) {
+		juce::MessageManager::callSync([this]() {
+			buttonClicked(&playPauseButton);
+			});
+		
+	}
 }
 void PlayerGUI::releaseResources()
 {
