@@ -4,7 +4,8 @@
 
 class PlayerGUI : public juce::Component,
     public juce::Button::Listener,
-    public juce::Slider::Listener
+    public juce::Slider::Listener,
+    public juce::TableListBoxModel
 {
 public:
     PlayerGUI();
@@ -18,6 +19,12 @@ public:
     juce::ShapeButton createShapeButton(const juce::String& name);
     juce::Path CreateButtonShape(const juce::String& name);
     void changePlayer();
+    //======================================
+    int getNumRows()override;
+    void paintRowBackground(juce::Graphics& g, int rowNumber, int width, int height, bool rowIsSelected)override;
+    void paintCell(juce::Graphics& g, int rowNumber, int columId, int width, int height, bool rowIsSelected)override;
+    juce::Component* refreshComponentForCell(int rowNumber, int columnId, bool isRowSelected, Component* existingComponentTpUpdate) override;
+    void LoadFile();
 private:
     PlayerAudio playerAudio;
     // GUI elements
@@ -26,8 +33,10 @@ private:
     juce::TextButton muteButton{ "Mute" };
     juce::TextButton loopButton{ "Loop" };
     juce::ShapeButton playPauseButton, goToStartButton, goToEndButton;
-
+    //==================================
+    juce::TableListBox PlaylistBox;
     std::unique_ptr<juce::FileChooser> fileChooser;
+    juce::TextButton addToPlaylist{ "Add" };
     // Event handlers
     void buttonClicked(juce::Button* button) override;
     void sliderValueChanged(juce::Slider* slider) override;

@@ -1,5 +1,4 @@
 #include "PlayerAudio.h"
-
 PlayerAudio::PlayerAudio() {
     formatManager.registerBasicFormats();
 }
@@ -15,24 +14,26 @@ void PlayerAudio::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
     transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
-void PlayerAudio::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
+bool PlayerAudio::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
     transportSource.getNextAudioBlock(bufferToFill);
 
     // if you've reached to the end of the song and looping is enabled, restart playback
 
-    if (transportSource.getCurrentPosition() >= transportSource.getLengthInSeconds()) {
+    if (transportSource.getCurrentPosition() >= transportSource.getLengthInSeconds()-1) {
         if (isLooping) {
             transportSource.setPosition(0.0);
             transportSource.start();
         }
         else {
-            isPlaying = false;
             setPosition(0.0f);
             previousPosition = 0.0f;
+            if (transportSource.getLengthInSeconds() > 0) return true;
+            else return false;
         }
 
     }
+    return false;
 }
 void PlayerAudio::releaseResources()
 {
@@ -132,4 +133,18 @@ void PlayerAudio::toggleLooping()
 bool PlayerAudio::getLoopState() const
 {
     return isLooping;
+}
+void PlayerAudio::addToPlaylist(const juce::File& file) {
+    filesNames.add(juce::String(file.getFileName()));
+    playlistfiles.add(file);
+}
+juce::StringArray PlayerAudio::getFilesNames() {
+    return filesNames;
+}
+juce::File PlayerAudio::getFile(int rowNumber) {
+    return playlistfiles[rowNumber];
+}
+void PlayerAudio::deleteTrack(int rowNumber) {
+    filesNames.remove(rowNumber);
+    playlistfiles.remove(rowNumber);
 }
