@@ -1,0 +1,245 @@
+#include "PlayerGUI.h"
+
+PlayerGUI::PlayerGUI() :
+	playPauseButton(createShapeButton("playPauseButton")),
+	goToStartButton(createShapeButton("goToStartButton")),
+	goToEndButton(createShapeButton("goToEndButton"))
+{
+	std::array<juce::Button*, 7> buttons = {
+		&loadButton, &muteButton,
+		&playPauseButton, &goToStartButton, &goToEndButton,
+		&loopButton,&addToPlaylist
+	};
+
+	for (auto* btn : buttons)
+	{
+		addAndMakeVisible(btn);
+		btn->addListener(this);
+	}
+
+	volumeslider.setRange(0.0, 1.0, 0.01);
+	volumeslider.setValue(0.5);
+	volumeslider.addListener(this);
+	addAndMakeVisible(volumeslider);
+
+	playPauseButton.setShape(CreateButtonShape("play"), true, true, true);
+	goToStartButton.setShape(CreateButtonShape("goToStart"), true, true, true);
+	goToEndButton.setShape(CreateButtonShape("goToEnd"), true, true, true);
+
+	loopButton.setButtonText("Loop: OFF");
+
+	playPauseButton.addListener(this);
+	goToStartButton.addListener(this);
+	goToEndButton.addListener(this);
+	//=========================================
+	PlaylistBox.setModel(this);
+	addAndMakeVisible(PlaylistBox);
+	PlaylistBox.getHeader().addColumn("Track Title", 1, 410);
+	//PlaylistBox.getHeader().addColumn("Duration", 2, 200);
+	PlaylistBox.getHeader().addColumn("", 3, 100);
+	PlaylistBox.getHeader().addColumn("", 4, 100);
+	PlaylistBox.getHeader().setStretchToFitActive(true);
+	PlaylistBox.getHeader().setPopupMenuActive(false);
+	PlaylistBox.updateContent();
+	
+}
+
+PlayerGUI::~PlayerGUI() {}
+void PlayerGUI::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
+{
+	playerAudio.prepareToPlay(samplesPerBlockExpected, sampleRate);
+}
+void PlayerGUI::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
+{
+	if (playerAudio.getNextAudioBlock(bufferToFill)) {
+		juce::MessageManager::callSync([this]() {
+			buttonClicked(&playPauseButton);
+			});
+	}
+}
+void PlayerGUI::releaseResources()
+{
+	playerAudio.releaseResources();
+}
+void PlayerGUI::resized() {
+	int y = 10;
+	loadButton.setBounds(0, y, 80, 30);
+	muteButton.setBounds(0, 50, 80, 30);
+	volumeslider.setBounds(100, 60, getWidth() - 20, 30);
+	loopButton.setBounds(0, 90, 80, 30);
+
+	playPauseButton.setBounds(getWidth() / 2 - 15, y, 30, 30);
+	goToStartButton.setBounds(getWidth() / 2 - 55, y + 5, 20, 20);
+	goToEndButton.setBounds(getWidth() / 2 + 35, y + 5, 20, 20);
+
+	//=============================================
+	PlaylistBox.setBounds(0, 2*getHeight() / 3, getWidth(), getHeight() / 3);
+	addToPlaylist.setBounds(0, 2*getHeight() / 3-30, 80, 30);
+}
+void PlayerGUI::buttonClicked(juce::Button* button)
+{
+	if (button == &loadButton)
+	{
+		fileChooser = std::make_unique<juce::FileChooser>(
+			"Select an audio file...", juce::File{}, "*.wav;*.mp3");
+
+		fileChooser->launchAsync(
+			juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+			[this](const juce::FileChooser& fc)
+			{
+				auto file = fc.getResult();
+				if (file.existsAsFile())
+				{
+					playerAudio.LoadFile(file);
+				}
+			});
+	}
+	else if (button == &muteButton)
+	{
+		playerAudio.toggleMute();
+	}
+	else if (button == &playPauseButton) {
+		playerAudio.togglePlayer();
+		changePlayer();
+	}
+	else if (button == &goToStartButton) {
+		playerAudio.setPosition(0.0f);
+		playerAudio.setPreviousPosition(0.0f);
+	}
+	else if (button == &goToEndButton) {
+		playerAudio.setPosition(playerAudio.getLength());
+		playerAudio.setPreviousPosition(0.0f);
+		/*playPauseButton.setShape(CreateButtonShape("play"), true, true, true);
+		playPauseButton.setBounds(getWidth() / 2 - 15, 10, 30, 30);
+		playerAudio.setPlayerState(false);*/
+	}
+	else if (button == &loopButton) {
+
+		playerAudio.toggleLooping();
+
+		if (playerAudio.getLoopState()) {
+			loopButton.setButtonText("Loop: ON");
+		}
+		else {
+			loopButton.setButtonText("Loop: OFF");
+		}
+
+	}
+	else if (button == &addToPlaylist) {
+		fileChooser = std::make_unique<juce::FileChooser>(
+			"Select an audio file...", juce::File{}, "*.wav;*.mp3");
+
+		fileChooser->launchAsync(
+			juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+			[this](const juce::FileChooser& fc)
+			{
+				auto file = fc.getResult();
+				if (file.existsAsFile())
+				{
+					playerAudio.addToPlaylist(file);
+					PlaylistBox.updateContent();
+					PlaylistBox.repaint();
+				}
+			});
+		
+	}
+	else {
+		juce::String buttonID = button->getComponentID();
+		juce::StringArray IDParts = juce::StringArray::fromTokens(buttonID, ":", "");
+		int rowNumber = IDParts[0].getIntValue();
+		if (IDParts.size() == 2) {
+			if (IDParts[1] == "delete") {
+				playerAudio.deleteTrack(rowNumber);
+				PlaylistBox.updateContent();
+				PlaylistBox.repaint();
+			}
+			else if (IDParts[1] == "load") {
+				playerAudio.LoadFile(playerAudio.getFile(rowNumber));
+			}
+		}
+	}
+}
+void PlayerGUI::sliderValueChanged(juce::Slider* slider)
+{
+	if (slider == &volumeslider)
+		playerAudio.setGainFromGUI((float)volumeslider.getValue());
+}
+juce::ShapeButton PlayerGUI::createShapeButton(const juce::String& name) {
+	return juce::ShapeButton(
+		name, juce::Colours::seashell,
+		juce::Colours::black,
+		juce::Colours::bisque);
+}
+juce::Path PlayerGUI::CreateButtonShape(const juce::String& name) {
+	juce::Path buttonShape;
+	if (name == "pause") {
+		buttonShape.addRectangle(0.2f, 0.2f, 0.15f, 0.6f);
+		buttonShape.addRectangle(0.6f, 0.2f, 0.15f, 0.6f);
+	}
+	else if (name == "play") {
+		buttonShape.addTriangle(0.2f, 0.2f, 0.2f, 0.8f, 0.8f, 0.5f);
+	}
+	else if (name == "goToStart") {
+		buttonShape.addRectangle(0.2f, 0.2f, 0.15f, 0.6f);
+		buttonShape.addTriangle(0.5f, 0.5f, 0.8f, 0.8f, 0.8f, 0.2f);
+	}
+	else if (name == "goToEnd") {
+		buttonShape.addTriangle(0.2f, 0.2f, 0.5f, 0.5f, 0.2f, 0.8f);
+		buttonShape.addRectangle(0.65f, 0.2f, 0.15f, 0.6f);
+	}
+	return buttonShape;
+}
+void PlayerGUI::changePlayer() {
+	if (playerAudio.getPlayerState()) {
+		playPauseButton.setShape(CreateButtonShape("pause"), true, true, true);
+		playPauseButton.setBounds(getWidth() / 2 - 15, 10, 30, 30);
+
+	}
+	else {
+		playPauseButton.setShape(CreateButtonShape("play"), true, true, true);
+		playPauseButton.setBounds(getWidth() / 2 - 15, 10, 30, 30);
+	}
+}
+//========================================================
+int PlayerGUI::getNumRows() {
+	juce::StringArray filesNames = playerAudio.getFilesNames();
+	return filesNames.size();
+}
+void PlayerGUI::paintRowBackground(juce::Graphics& g, int rowNumber, int width, int height, bool rowIsSelected) {
+	if (rowIsSelected) {
+		g.fillAll(juce::Colours::orange);
+	}
+	else {
+		g.fillAll(juce::Colours::grey);
+	}
+}
+void PlayerGUI::paintCell(juce::Graphics& g, int rowNumber, int columId, int width, int height, bool rowIsSelected) {
+	juce::StringArray filesNames = playerAudio.getFilesNames();
+
+	g.drawText(filesNames[rowNumber],
+		2, 0,
+		width, height,
+		juce::Justification::centredLeft,
+		true);
+}
+juce::Component* PlayerGUI::refreshComponentForCell(int rowNumber, int columnId, bool isRowSelected, Component* existingComponentTpUpdate) {
+	if (columnId ==4) {
+		if (existingComponentTpUpdate == nullptr) {
+			juce::TextButton* d = new juce::TextButton("Delete");
+			d->addListener(this);
+			juce::String id{std::to_string(rowNumber)+":delete"};
+			d->setComponentID(id);
+			existingComponentTpUpdate = d;
+		}
+	}
+	else if (columnId == 3) {
+		if (existingComponentTpUpdate == nullptr) {
+			juce::TextButton* load = new juce::TextButton("Load");
+			load->addListener(this);
+			juce::String id{ std::to_string(rowNumber)+":load" };
+			load->setComponentID(id);
+			existingComponentTpUpdate = load;
+		}
+	}
+	return existingComponentTpUpdate;
+}
