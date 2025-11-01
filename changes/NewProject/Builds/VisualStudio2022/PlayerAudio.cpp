@@ -20,7 +20,7 @@ bool PlayerAudio::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferTo
 
     // if you've reached to the end of the song and looping is enabled, restart playback
 
-    if (transportSource.getCurrentPosition() >= transportSource.getLengthInSeconds()) {
+    if (transportSource.getCurrentPosition() >= transportSource.getLengthInSeconds()-1) {
         if (isLooping) {
             transportSource.setPosition(0.0);
             transportSource.start();
@@ -133,4 +133,18 @@ void PlayerAudio::toggleLooping()
 bool PlayerAudio::getLoopState() const
 {
     return isLooping;
+}
+void PlayerAudio::addToPlaylist(const juce::File& file) {
+    filesNames.add(juce::String(file.getFileName()));
+    playlistfiles.add(file);
+}
+juce::StringArray PlayerAudio::getFilesNames() {
+    return filesNames;
+}
+juce::File PlayerAudio::getFile(int rowNumber) {
+    return playlistfiles[rowNumber];
+}
+void PlayerAudio::deleteTrack(int rowNumber) {
+    filesNames.remove(rowNumber);
+    playlistfiles.remove(rowNumber);
 }

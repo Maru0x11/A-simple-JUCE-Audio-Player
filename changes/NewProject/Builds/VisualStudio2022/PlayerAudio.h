@@ -1,7 +1,7 @@
 #pragma once
 #include <JuceHeader.h>
 
-class PlayerAudio : juce::ChangeBroadcaster
+class PlayerAudio 
 {
 public:
     PlayerAudio();
@@ -24,7 +24,10 @@ public:
     void setPreviousPosition(float pos);
     void toggleLooping();
     bool getLoopState() const;
-
+    void addToPlaylist(const juce::File& file);
+    juce::StringArray getFilesNames();
+    juce::File getFile(int rowNumber);
+    void deleteTrack(int rowNumber);
 private:
 
     juce::AudioFormatManager formatManager;
@@ -35,6 +38,8 @@ private:
     float previousPosition = 0.0f;
     bool isPlaying = false;
     bool isLooping = false;
+    juce::Array<juce::String> filesNames;
+    juce::Array<juce::File> playlistfiles;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerAudio)
 };
 
