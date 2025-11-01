@@ -5,7 +5,8 @@
 class PlayerGUI : public juce::Component,
     public juce::Button::Listener,
     public juce::Slider::Listener,
-    public juce::TableListBoxModel
+    public juce::TableListBoxModel,
+    public juce::Timer
 {
 public:
     PlayerGUI();
@@ -37,9 +38,15 @@ private:
     juce::TableListBox PlaylistBox;
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::TextButton addToPlaylist{ "Add" };
+    //==================================
+    juce::Slider positionSlider;
+    juce::Label positionLabel;
+    juce::Label durationLabel;
+
     // Event handlers
     void buttonClicked(juce::Button* button) override;
     void sliderValueChanged(juce::Slider* slider) override;
+    void timerCallback();
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerGUI)
 };
 

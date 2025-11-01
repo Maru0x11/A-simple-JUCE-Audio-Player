@@ -70,15 +70,23 @@ void PlayerAudio::setGain(float gain)
 
 void PlayerAudio::setPosition(double pos)
 {
-    transportSource.setPosition(pos);
+    if (readerSource != nullptr) {
+        transportSource.setPosition(pos);
+    }
 }
 double PlayerAudio::getPosition() const
-{
-    return transportSource.getCurrentPosition();
+{   
+    if (readerSource != nullptr) {
+		return transportSource.getCurrentPosition();
+    }
+    return 0.0;
 }
 double PlayerAudio::getLength() const
 {
-    return transportSource.getLengthInSeconds();
+   if (readerSource != nullptr) {
+       return transportSource.getLengthInSeconds();
+   }
+   return 0.0;
 }
 
 void PlayerAudio::setGainFromGUI(float gain)

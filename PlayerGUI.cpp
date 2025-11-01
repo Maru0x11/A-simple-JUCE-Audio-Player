@@ -41,6 +41,25 @@ PlayerGUI::PlayerGUI() :
 	PlaylistBox.getHeader().setStretchToFitActive(true);
 	PlaylistBox.getHeader().setPopupMenuActive(false);
 	PlaylistBox.updateContent();
+
+	//===========================================
+	addAndMakeVisible(positionSlider);
+	positionSlider.setRange(0.0, 1.0, 0.001);
+	positionSlider.setSliderStyle(juce::Slider::LinearHorizontal);
+	positionSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+	positionSlider.addListener(this);
+
+	addAndMakeVisible(positionLabel);
+	positionLabel.setText("00:00", juce::dontSendNotification);
+	positionLabel.setJustificationType(juce::Justification::centredLeft);
+
+	addAndMakeVisible(durationLabel);
+	durationLabel.setText("00:00", juce::dontSendNotification);
+	durationLabel.setJustificationType(juce::Justification::centredRight);
+
+	startTimer(100);
+
+	//===========================================
 	
 }
 
@@ -65,16 +84,26 @@ void PlayerGUI::resized() {
 	int y = 10;
 	loadButton.setBounds(0, y, 80, 30);
 	muteButton.setBounds(0, 50, 80, 30);
-	volumeslider.setBounds(100, 60, getWidth() - 20, 30);
 	loopButton.setBounds(0, 90, 80, 30);
 
 	playPauseButton.setBounds(getWidth() / 2 - 15, y, 30, 30);
 	goToStartButton.setBounds(getWidth() / 2 - 55, y + 5, 20, 20);
 	goToEndButton.setBounds(getWidth() / 2 + 35, y + 5, 20, 20);
 
-	//=============================================
-	PlaylistBox.setBounds(0, 2*getHeight() / 3, getWidth(), getHeight() / 3);
-	addToPlaylist.setBounds(0, 2*getHeight() / 3-30, 80, 30);
+	// ===========================================
+	int positionY = 130;  
+	int positionX = 10;
+
+	positionLabel.setBounds(positionX, positionY, 60, 20); 
+	durationLabel.setBounds(getWidth() - 60 - positionX, positionY, 60, 20); 
+
+	int sliderY = positionY + 25;  
+	positionSlider.setBounds(positionX, sliderY, getWidth() - 2 * positionX, 30);
+	volumeslider.setBounds(100, 200, getWidth() - 120, 30);
+	
+	addToPlaylist.setBounds(0, 2 * getHeight() / 3 - 30, 80, 30);
+	PlaylistBox.setBounds(0, 2 * getHeight() / 3, getWidth(), getHeight() / 3);
+
 }
 void PlayerGUI::buttonClicked(juce::Button* button)
 {
@@ -163,6 +192,11 @@ void PlayerGUI::sliderValueChanged(juce::Slider* slider)
 {
 	if (slider == &volumeslider)
 		playerAudio.setGainFromGUI((float)volumeslider.getValue());
+	else if (slider == &positionSlider) {
+
+		double newPosition = positionSlider.getValue() * playerAudio.getLength();
+		playerAudio.setPosition(newPosition);
+	}
 }
 juce::ShapeButton PlayerGUI::createShapeButton(const juce::String& name) {
 	return juce::ShapeButton(
@@ -243,3 +277,25 @@ juce::Component* PlayerGUI::refreshComponentForCell(int rowNumber, int columnId,
 	}
 	return existingComponentTpUpdate;
 }
+
+//========================================================
+
+juce::String formatTime(double timeInSeconds) {
+
+	int totalSeconds = static_cast<int>(timeInSeconds);
+	int minutes = totalSeconds / 60;
+	int seconds = totalSeconds % 60;
+	return juce::String::formatted("%02d:%02d", minutes, seconds);
+}
+
+void PlayerGUI::timerCallback() {
+		
+	if (playerAudio.getLength() > 0) {
+
+		double currentPos = playerAudio.getPosition();
+		double totalLength = playerAudio.getLength();
+		positionSlider.setValue(currentPos / totalLength, juce::dontSendNotification);
+		positionLabel.setText(formatTime(currentPos), juce::dontSendNotification);
+		durationLabel.setText(formatTime(totalLength), juce::dontSendNotification);
+	}
+ }
