@@ -35,7 +35,6 @@ PlayerGUI::PlayerGUI() :
 	PlaylistBox.setModel(this);
 	addAndMakeVisible(PlaylistBox);
 	PlaylistBox.getHeader().addColumn("Track Title", 1, 410);
-	//PlaylistBox.getHeader().addColumn("Duration", 2, 200);
 	PlaylistBox.getHeader().addColumn("", 3, 100);
 	PlaylistBox.getHeader().addColumn("", 4, 100);
 	PlaylistBox.getHeader().setStretchToFitActive(true);
@@ -68,7 +67,10 @@ PlayerGUI::PlayerGUI() :
 	setMarkerAButton.setButtonText("Set A");
 	setMarkerBButton.setButtonText("Set B");
 	clearMarkersButton.setButtonText("Clear A-B");
-	
+	//***********************************************
+	/*addAndMakeVisible(metadataTextEditor);
+	addAndMakeVisible(metadataViewPort);*/
+	//***********************************************	
 }
 
 PlayerGUI::~PlayerGUI() {}
@@ -118,7 +120,22 @@ void PlayerGUI::resized() {
 	setMarkerAButton.setBounds(0, markerY, 80, 30);
 	setMarkerBButton.setBounds(90, markerY, 80, 30);
 	clearMarkersButton.setBounds(180, markerY, 80, 30);
+	//******************************************************************************
+	/*metadataTextEditor.setColour(juce::TextEditor::textColourId, juce::Colours::black);
+	metadataTextEditor.setColour(juce::TextEditor::backgroundColourId, juce::Colours::lightgrey);
+	metadataTextEditor.setMultiLine(true);
+	metadataTextEditor.setReadOnly(true);
+	metadataTextEditor.setFont(juce::Font("Courier New", 14.0f, juce::Font::bold));
+	metadataTextEditor.setScrollbarsShown(true);
+	metadataTextEditor.setCaretVisible(false);
 
+	metadataTextEditor.setSize(getWidth() / 2, 120);
+
+	metadataViewPort.setScrollBarsShown(true, true);
+
+	metadataViewPort.setViewedComponent(&metadataTextEditor, false);
+	metadataViewPort.setBounds(100, 50, getWidth()-100, 70);*/
+	//****************************************************************************
 }
 void PlayerGUI::buttonClicked(juce::Button* button)
 {
@@ -135,6 +152,11 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 				if (file.existsAsFile())
 				{
 					playerAudio.LoadFile(file);
+					//***************************************
+					/*playerAudio.readMetadata(file);
+					metadataText = playerAudio.getMetadata();
+					metadataTextEditor.setText(metadataText);*/
+					//**************************************
 				}
 			});
 	}
@@ -144,7 +166,7 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 	}
 	else if (button == &playPauseButton) {
 		playerAudio.togglePlayer();
-		changePlayer();
+		repaint();
 	}
 	else if (button == &goToStartButton) {
 		playerAudio.setPosition(0.0f);
@@ -153,9 +175,6 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 	else if (button == &goToEndButton) {
 		playerAudio.setPosition(playerAudio.getLength());
 		playerAudio.setPreviousPosition(0.0f);
-		/*playPauseButton.setShape(CreateButtonShape("play"), true, true, true);
-		playPauseButton.setBounds(getWidth() / 2 - 15, 10, 30, 30);
-		playerAudio.setPlayerState(false);*/
 	}
 	else if (button == &loopButton) {
 
@@ -218,7 +237,13 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 				PlaylistBox.repaint();
 			}
 			else if (IDParts[1] == "load") {
-				playerAudio.LoadFile(playerAudio.getFile(rowNumber));
+				juce::File file = playerAudio.getFile(rowNumber);
+				playerAudio.LoadFile(file);
+				//***************************************
+				/*playerAudio.readMetadata(file);
+				metadataText = playerAudio.getMetadata();
+				metadataTextEditor.setText(metadataText);*/
+				//**************************************
 			}
 		}
 	}
@@ -257,17 +282,6 @@ juce::Path PlayerGUI::CreateButtonShape(const juce::String& name) {
 		buttonShape.addRectangle(0.65f, 0.2f, 0.15f, 0.6f);
 	}
 	return buttonShape;
-}
-void PlayerGUI::changePlayer() {
-	if (playerAudio.getPlayerState()) {
-		playPauseButton.setShape(CreateButtonShape("pause"), true, true, true);
-		playPauseButton.setBounds(getWidth() / 2 - 15, 10, 30, 30);
-
-	}
-	else {
-		playPauseButton.setShape(CreateButtonShape("play"), true, true, true);
-		playPauseButton.setBounds(getWidth() / 2 - 15, 10, 30, 30);
-	}
 }
 //========================================================
 int PlayerGUI::getNumRows() {
@@ -409,5 +423,13 @@ void PlayerGUI::paint(juce::Graphics& g) {
 		g.setColour(juce::Colours::white);
 		g.fillPath(triangle);
 	}
+	if (playerAudio.getPlayerState()) {
+		playPauseButton.setShape(CreateButtonShape("pause"), true, true, true);
+		playPauseButton.setBounds(getWidth() / 2 - 15, 10, 30, 30);
 
+	}
+	else {
+		playPauseButton.setShape(CreateButtonShape("play"), true, true, true);
+		playPauseButton.setBounds(getWidth() / 2 - 15, 10, 30, 30);
+	}
 }

@@ -19,13 +19,11 @@ public:
     void releaseResources();
     juce::ShapeButton createShapeButton(const juce::String& name);
     juce::Path CreateButtonShape(const juce::String& name);
-    void changePlayer();
     //======================================
     int getNumRows()override;
     void paintRowBackground(juce::Graphics& g, int rowNumber, int width, int height, bool rowIsSelected)override;
     void paintCell(juce::Graphics& g, int rowNumber, int columId, int width, int height, bool rowIsSelected)override;
     juce::Component* refreshComponentForCell(int rowNumber, int columnId, bool isRowSelected, Component* existingComponentTpUpdate) override;
-    void LoadFile();
 	//======================================
     void paint(juce::Graphics& g) override;
 private:
@@ -54,7 +52,11 @@ private:
 	juce::TextButton setMarkerAButton{ "Set Marker A" };
 	juce::TextButton setMarkerBButton{ "Set Marker B" };
 	juce::TextButton clearMarkersButton{ "Clear Markers" };
-
+    //*********************************
+    /*juce::TextEditor metadataTextEditor;
+    juce::String metadataText;
+    juce::Viewport metadataViewPort;*/
+    // *********************************
     // Event handlers
     void buttonClicked(juce::Button* button) override;
     void sliderValueChanged(juce::Slider* slider) override;
