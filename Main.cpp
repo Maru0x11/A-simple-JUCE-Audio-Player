@@ -16,7 +16,7 @@ public:
 
     void shutdown() override
     {
-        mainWindow = nullptr; // Clean up
+        mainWindow = nullptr;   // Clean up
     }
 
 private:
@@ -30,8 +30,8 @@ private:
                 DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar(true);
-            setContentOwned(new MainComponent(), true); // MainComponent = our UI + logic
-            centreWithSize(850, 500);
+            setContentOwned(new MainComponent(), true);  // MainComponent = our UI + logic
+            centreWithSize(600, 500);
             setVisible(true);
         }
 
@@ -46,4 +46,3 @@ private:
 
 // This macro starts the app
 START_JUCE_APPLICATION(SimpleAudioPlayer)
-
