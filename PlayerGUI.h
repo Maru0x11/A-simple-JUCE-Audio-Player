@@ -24,7 +24,7 @@ public:
     void paintRowBackground(juce::Graphics& g, int rowNumber, int width, int height, bool rowIsSelected)override;
     void paintCell(juce::Graphics& g, int rowNumber, int columId, int width, int height, bool rowIsSelected)override;
     juce::Component* refreshComponentForCell(int rowNumber, int columnId, bool isRowSelected, Component* existingComponentTpUpdate) override;
-	//======================================
+    //======================================
     void paint(juce::Graphics& g) override;
 private:
     PlayerAudio playerAudio;
@@ -34,6 +34,10 @@ private:
     juce::TextButton muteButton{ "Mute" };
     juce::TextButton loopButton{ "Loop" };
     juce::ShapeButton playPauseButton, goToStartButton, goToEndButton;
+
+    juce::Slider speedSlider;
+    juce::Label speedLabel;
+
     //==================================
     juce::TableListBox PlaylistBox;
     std::unique_ptr<juce::FileChooser> fileChooser;
@@ -42,21 +46,25 @@ private:
     juce::Slider positionSlider;
     juce::Label positionLabel;
     juce::Label durationLabel;
-   //==================================
+    //==================================
 
     double markerA;
     double markerB;
-	bool hasMarkerA;
+    bool hasMarkerA;
     bool hasMarkerB;
 
-	juce::TextButton setMarkerAButton{ "Set Marker A" };
-	juce::TextButton setMarkerBButton{ "Set Marker B" };
-	juce::TextButton clearMarkersButton{ "Clear Markers" };
+    juce::TextButton setMarkerAButton{ "Set Marker A" };
+    juce::TextButton setMarkerBButton{ "Set Marker B" };
+    juce::TextButton clearMarkersButton{ "Clear Markers" };
+
     //*********************************
     /*juce::TextEditor metadataTextEditor;
     juce::String metadataText;
     juce::Viewport metadataViewPort;*/
     // *********************************
+    juce::AudioThumbnailCache thumbnailCache{ 1 };
+    juce::AudioThumbnail thumbnail{ 512, *playerAudio.getFormatManager(), thumbnailCache };
+
     // Event handlers
     void buttonClicked(juce::Button* button) override;
     void sliderValueChanged(juce::Slider* slider) override;
@@ -64,4 +72,3 @@ private:
     juce::String formatTime(double seconds);
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerGUI)
 };
-
