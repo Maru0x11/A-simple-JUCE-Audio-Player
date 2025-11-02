@@ -26,6 +26,8 @@ public:
     void paintCell(juce::Graphics& g, int rowNumber, int columId, int width, int height, bool rowIsSelected)override;
     juce::Component* refreshComponentForCell(int rowNumber, int columnId, bool isRowSelected, Component* existingComponentTpUpdate) override;
     void LoadFile();
+	//======================================
+    void paint(juce::Graphics& g) override;
 private:
     PlayerAudio playerAudio;
     // GUI elements
@@ -42,11 +44,22 @@ private:
     juce::Slider positionSlider;
     juce::Label positionLabel;
     juce::Label durationLabel;
+   //==================================
+
+    double markerA;
+    double markerB;
+	bool hasMarkerA;
+    bool hasMarkerB;
+
+	juce::TextButton setMarkerAButton{ "Set Marker A" };
+	juce::TextButton setMarkerBButton{ "Set Marker B" };
+	juce::TextButton clearMarkersButton{ "Clear Markers" };
 
     // Event handlers
     void buttonClicked(juce::Button* button) override;
     void sliderValueChanged(juce::Slider* slider) override;
-    void timerCallback();
+    void timerCallback() override;
+    juce::String formatTime(double seconds);
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerGUI)
 };
 
