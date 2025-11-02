@@ -3,28 +3,26 @@
 //#include <taglib/tag.h>
 //#include <taglib/fileref.h>
 //****************************************
-PlayerAudio::PlayerAudio() {
+PlayerAudio::PlayerAudio() : resamplingSource(&transportSource, false)
+{
     formatManager.registerBasicFormats();
 }
 
 PlayerAudio::~PlayerAudio()
 {
-    // Important: Clear the transport source before destroying readerSource
-
     transportSource.setSource(nullptr);
     readerSource.reset();
 }
 void PlayerAudio::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
     transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
+    resamplingSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 bool PlayerAudio::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
-    transportSource.getNextAudioBlock(bufferToFill);
+    resamplingSource.getNextAudioBlock(bufferToFill);
 
-    // if you've reached to the end of the song and looping is enabled, restart playback
-
-    if (transportSource.getCurrentPosition() >= transportSource.getLengthInSeconds()-1) {
+    if (transportSource.getCurrentPosition() >= transportSource.getLengthInSeconds() - 1) {
         if (isLooping) {
             transportSource.setPosition(0.0);
             transportSource.start();
@@ -42,26 +40,25 @@ bool PlayerAudio::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferTo
 void PlayerAudio::releaseResources()
 {
     transportSource.releaseResources();
+    resamplingSource.releaseResources();
 }
 bool PlayerAudio::LoadFile(const juce::File& file) {
 
-    // Stop and clear the transport source first
     transportSource.stop();
     transportSource.setSource(nullptr);
 
-    // Reset the reader source (this will delete the reader)
     readerSource.reset();
 
     if (auto* reader = formatManager.createReaderFor(file))
     {
-        // Create new reader source
         readerSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
 
-        // Connect the new source
         transportSource.setSource(readerSource.get(),
             0,
             nullptr,
             reader->sampleRate);
+
+        setPlaybackSpeed(1.0f);
         return true;
     }
     return false;
@@ -79,18 +76,18 @@ void PlayerAudio::setPosition(double pos)
     }
 }
 double PlayerAudio::getPosition() const
-{   
+{
     if (readerSource != nullptr) {
-		return transportSource.getCurrentPosition();
+        return transportSource.getCurrentPosition();
     }
     return 0.0;
 }
 double PlayerAudio::getLength() const
 {
-   if (readerSource != nullptr) {
-       return transportSource.getLengthInSeconds();
-   }
-   return 0.0;
+    if (readerSource != nullptr) {
+        return transportSource.getLengthInSeconds();
+    }
+    return 0.0;
 }
 
 void PlayerAudio::setGainFromGUI(float gain)
@@ -161,6 +158,24 @@ juce::File PlayerAudio::getFile(int rowNumber) {
 void PlayerAudio::deleteTrack(int rowNumber) {
     filesNames.remove(rowNumber);
     playlistfiles.remove(rowNumber);
+}
+
+void PlayerAudio::setPlaybackSpeed(float speed)
+{
+    currentSpeed = speed;
+    if (readerSource != nullptr) {
+        resamplingSource.setResamplingRatio(speed);
+    }
+}
+
+float PlayerAudio::getPlaybackSpeed() const
+{
+    return currentSpeed;
+}
+
+juce::AudioFormatManager* PlayerAudio::getFormatManager()
+{
+    return &formatManager;
 }
 //***********************************************************************
 //void PlayerAudio::readMetadata(const juce::File& file) {
