@@ -1,7 +1,7 @@
 #pragma once
 #include <JuceHeader.h>
 
-class PlayerAudio 
+class PlayerAudio
 {
 public:
     PlayerAudio();
@@ -32,11 +32,20 @@ public:
     /*void readMetadata(const juce::File& file);
     juce::String getMetadata();*/
     //***********************************
-private:
 
+    void setPlaybackSpeed(float speed);
+    float getPlaybackSpeed() const;
+
+    juce::AudioFormatManager* getFormatManager();
+
+private:
     juce::AudioFormatManager formatManager;
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
     juce::AudioTransportSource transportSource;
+
+    juce::ResamplingAudioSource resamplingSource;
+    float currentSpeed = 1.0f;
+
     float previousVolume = 0.5f;
     bool isMuted = false;
     float previousPosition = 0.0f;
@@ -47,6 +56,6 @@ private:
     //*************************************
     //juce::String metadata;
     //*************************************
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerAudio)
 };
-
