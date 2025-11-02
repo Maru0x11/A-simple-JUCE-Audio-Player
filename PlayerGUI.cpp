@@ -3,12 +3,13 @@
 PlayerGUI::PlayerGUI() :
 	playPauseButton(createShapeButton("playPauseButton")),
 	goToStartButton(createShapeButton("goToStartButton")),
-	goToEndButton(createShapeButton("goToEndButton"))
+	goToEndButton(createShapeButton("goToEndButton")),
+	thumbnail(512, *playerAudio.getFormatManager(), thumbnailCache)
 {
 	std::array<juce::Button*, 10> buttons = {
 		&loadButton, &muteButton,
 		&playPauseButton, &goToStartButton, &goToEndButton,
-		& loopButton,& addToPlaylist, &setMarkerAButton,& setMarkerBButton,& clearMarkersButton
+		&loopButton,&addToPlaylist, &setMarkerAButton,&setMarkerBButton,&clearMarkersButton
 	};
 
 	for (auto* btn : buttons)
@@ -21,6 +22,16 @@ PlayerGUI::PlayerGUI() :
 	volumeslider.setValue(0.5);
 	volumeslider.addListener(this);
 	addAndMakeVisible(volumeslider);
+
+	speedSlider.setRange(0.25, 4.0, 0.05);
+	speedSlider.setValue(1.0);
+	speedSlider.setSliderStyle(juce::Slider::LinearHorizontal);
+	speedSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 60, 20);
+	speedSlider.addListener(this);
+	addAndMakeVisible(speedSlider);
+
+	speedLabel.setText("Speed:", juce::dontSendNotification);
+	speedLabel.attachToComponent(&speedSlider, true);
 
 	playPauseButton.setShape(CreateButtonShape("play"), true, true, true);
 	goToStartButton.setShape(CreateButtonShape("goToStart"), true, true, true);
@@ -58,7 +69,7 @@ PlayerGUI::PlayerGUI() :
 
 	startTimer(100);
 
-  //===========================================
+	//===========================================
 	markerA = 0.0;
 	markerB = 0.0;
 	hasMarkerA = false;
@@ -101,16 +112,19 @@ void PlayerGUI::resized() {
 	goToEndButton.setBounds(getWidth() / 2 + 35, y + 5, 20, 20);
 
 	// ===========================================
-	int positionY = 130;  
+	int positionY = 130;
 	int positionX = 10;
 
-	positionLabel.setBounds(positionX, positionY, 60, 20); 
-	durationLabel.setBounds(getWidth() - 60 - positionX, positionY, 60, 20); 
+	positionLabel.setBounds(positionX, positionY, 60, 20);
+	durationLabel.setBounds(getWidth() - 60 - positionX, positionY, 60, 20);
 
-	int sliderY = positionY + 25;  
+	int sliderY = positionY + 25;
 	positionSlider.setBounds(positionX, sliderY, getWidth() - 2 * positionX, 30);
-	volumeslider.setBounds(100, 200, getWidth() - 120, 30);
-	
+
+	speedSlider.setBounds(100, sliderY + 40, getWidth() - 150, 30);
+
+	volumeslider.setBounds(100, sliderY + 80, getWidth() - 120, 30);
+
 	addToPlaylist.setBounds(0, 2 * getHeight() / 3 - 30, 80, 30);
 	PlaylistBox.setBounds(0, 2 * getHeight() / 3, getWidth(), getHeight() / 3);
 
@@ -152,6 +166,7 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 				if (file.existsAsFile())
 				{
 					playerAudio.LoadFile(file);
+					thumbnail.setSource(new juce::FileInputSource(file));
 					//***************************************
 					/*playerAudio.readMetadata(file);
 					metadataText = playerAudio.getMetadata();
@@ -204,7 +219,7 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 					PlaylistBox.repaint();
 				}
 			});
-		
+
 	}
 
 	else if (button == &setMarkerAButton) {
@@ -220,7 +235,7 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 	}
 
 	else if (button == &clearMarkersButton) {
-		
+
 		hasMarkerA = false;
 		hasMarkerB = false;
 		repaint();
@@ -239,6 +254,7 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 			else if (IDParts[1] == "load") {
 				juce::File file = playerAudio.getFile(rowNumber);
 				playerAudio.LoadFile(file);
+				thumbnail.setSource(new juce::FileInputSource(file));
 				//***************************************
 				/*playerAudio.readMetadata(file);
 				metadataText = playerAudio.getMetadata();
@@ -256,6 +272,9 @@ void PlayerGUI::sliderValueChanged(juce::Slider* slider)
 
 		double newPosition = positionSlider.getValue() * playerAudio.getLength();
 		playerAudio.setPosition(newPosition);
+	}
+	else if (slider == &speedSlider) {
+		playerAudio.setPlaybackSpeed((float)speedSlider.getValue());
 	}
 }
 juce::ShapeButton PlayerGUI::createShapeButton(const juce::String& name) {
@@ -306,11 +325,11 @@ void PlayerGUI::paintCell(juce::Graphics& g, int rowNumber, int columId, int wid
 		true);
 }
 juce::Component* PlayerGUI::refreshComponentForCell(int rowNumber, int columnId, bool isRowSelected, Component* existingComponentTpUpdate) {
-	if (columnId ==4) {
+	if (columnId == 4) {
 		if (existingComponentTpUpdate == nullptr) {
 			juce::TextButton* d = new juce::TextButton("Delete");
 			d->addListener(this);
-			juce::String id{std::to_string(rowNumber)+":delete"};
+			juce::String id{ std::to_string(rowNumber) + ":delete" };
 			d->setComponentID(id);
 			existingComponentTpUpdate = d;
 		}
@@ -319,7 +338,7 @@ juce::Component* PlayerGUI::refreshComponentForCell(int rowNumber, int columnId,
 		if (existingComponentTpUpdate == nullptr) {
 			juce::TextButton* load = new juce::TextButton("Load");
 			load->addListener(this);
-			juce::String id{ std::to_string(rowNumber)+":load" };
+			juce::String id{ std::to_string(rowNumber) + ":load" };
 			load->setComponentID(id);
 			existingComponentTpUpdate = load;
 		}
@@ -337,32 +356,33 @@ juce::String PlayerGUI::formatTime(double timeInSeconds) {
 }
 
 void PlayerGUI::timerCallback() {
-		
-		double currentPos = playerAudio.getPosition();
-		double totalLength = playerAudio.getLength();
 
-		if (hasMarkerA && hasMarkerB ) {
+	double currentPos = playerAudio.getPosition();
+	double totalLength = playerAudio.getLength();
 
-			if (markerA > markerB) {
-				
-				double temp = markerA;
-				markerA = markerB;
-				markerB = temp;
-			}
-			
-			if (currentPos >= markerB) {
-					playerAudio.setPosition(markerA);
-					currentPos = markerA;
-				}
+	if (hasMarkerA && hasMarkerB) {
+
+		if (markerA > markerB) {
+
+			double temp = markerA;
+			markerA = markerB;
+			markerB = temp;
 		}
-	
-		if (playerAudio.getLength() > 0) {
 
-			positionSlider.setValue(currentPos / totalLength, juce::dontSendNotification);
-			positionLabel.setText(formatTime(currentPos), juce::dontSendNotification);
-			durationLabel.setText(formatTime(totalLength), juce::dontSendNotification);
+		if (currentPos >= markerB) {
+			playerAudio.setPosition(markerA);
+			currentPos = markerA;
 		}
 	}
+
+	if (playerAudio.getLength() > 0) {
+
+		positionSlider.setValue(currentPos / totalLength, juce::dontSendNotification);
+		positionLabel.setText(formatTime(currentPos), juce::dontSendNotification);
+		durationLabel.setText(formatTime(totalLength), juce::dontSendNotification);
+	}
+	repaint();
+}
 
 //========================================================
 
@@ -370,12 +390,31 @@ void PlayerGUI::paint(juce::Graphics& g) {
 
 	Component::paint(g);
 
+	if (thumbnail.getTotalLength() > 0.0)
+	{
+		auto area = getLocalBounds();
+		auto waveformArea = juce::Rectangle<int>(100, 300, getWidth() - 120, 80);
+
+		g.setColour(juce::Colours::lightblue);
+		thumbnail.drawChannels(g, waveformArea, 0.0, thumbnail.getTotalLength(), 1.0f);
+
+		double audioPosition = playerAudio.getPosition();
+		double proportion = audioPosition / playerAudio.getLength();
+		int playheadX = waveformArea.getX() + (int)(waveformArea.getWidth() * proportion);
+
+		g.setColour(juce::Colours::red);
+		g.drawLine(playheadX, waveformArea.getY(), playheadX, waveformArea.getBottom(), 2.0f);
+
+		g.setColour(juce::Colours::white);
+		g.drawRect(waveformArea, 1);
+	}
+
 	auto sliderBounds = positionSlider.getBounds();
 
-	int sliderX = sliderBounds.getX();           
-	int sliderY = sliderBounds.getY();           
-	int sliderWidth = sliderBounds.getWidth();   
-	int sliderHeight = sliderBounds.getHeight(); 
+	int sliderX = sliderBounds.getX();
+	int sliderY = sliderBounds.getY();
+	int sliderWidth = sliderBounds.getWidth();
+	int sliderHeight = sliderBounds.getHeight();
 
 	double totalLength = playerAudio.getLength();
 
@@ -384,7 +423,7 @@ void PlayerGUI::paint(juce::Graphics& g) {
 	}
 
 	if (hasMarkerA) {
-		
+
 		float markerAX = sliderX + (markerA / totalLength) * sliderWidth;
 
 		g.setColour(juce::Colours::white);
@@ -410,7 +449,7 @@ void PlayerGUI::paint(juce::Graphics& g) {
 
 		g.setColour(juce::Colours::white);
 
-		g.drawLine(markerBX,sliderY,markerBX,sliderY + sliderHeight,3.0f);
+		g.drawLine(markerBX, sliderY, markerBX, sliderY + sliderHeight, 3.0f);
 
 		juce::Path triangle;
 		float triangleSize = 6.0f;
