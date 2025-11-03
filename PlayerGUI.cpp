@@ -6,10 +6,11 @@ PlayerGUI::PlayerGUI() :
 	goToEndButton(createShapeButton("goToEndButton")),
 	thumbnail(512, *playerAudio.getFormatManager(), thumbnailCache)
 {
-	std::array<juce::Button*, 10> buttons = {
+	std::array<juce::Button*, 12> buttons = {   // update 10 to 12
 		&loadButton, &muteButton,
 		&playPauseButton, &goToStartButton, &goToEndButton,
-		&loopButton,&addToPlaylist, &setMarkerAButton,&setMarkerBButton,&clearMarkersButton
+		&loopButton,&addToPlaylist, &setMarkerAButton,&setMarkerBButton,&clearMarkersButton,
+		&backward10sButton,& forward10sButton //10>> 10<<
 	};
 
 	for (auto* btn : buttons)
@@ -107,10 +108,15 @@ void PlayerGUI::resized() {
 	muteButton.setBounds(0, 50, 80, 30);
 	loopButton.setBounds(0, 90, 80, 30);
 
-	playPauseButton.setBounds(getWidth() / 2 - 15, y, 30, 30);
-	goToStartButton.setBounds(getWidth() / 2 - 55, y + 5, 20, 20);
-	goToEndButton.setBounds(getWidth() / 2 + 35, y + 5, 20, 20);
 
+	// update
+	int centerX = getWidth() / 2;
+
+	goToStartButton.setBounds(centerX - 160, y + 5, 20, 20);     
+	backward10sButton.setBounds(centerX - 100, y, 60, 30);      
+	playPauseButton.setBounds(centerX - 15, y, 30, 30);         
+	forward10sButton.setBounds(centerX + 40, y, 60, 30);      
+	goToEndButton.setBounds(centerX + 140, y + 5, 20, 20);
 	// ===========================================
 	int positionY = 130;
 	int positionX = 10;
@@ -190,6 +196,18 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 	else if (button == &goToEndButton) {
 		playerAudio.setPosition(playerAudio.getLength());
 		playerAudio.setPreviousPosition(0.0f);
+	}
+	// update
+	else if (button == &backward10sButton) {
+		double currentPos = playerAudio.getPosition();
+		double newPos = juce::jmax(0.0, currentPos - 10.0);
+		playerAudio.setPosition(newPos);
+	}
+	else if (button == &forward10sButton) {
+		double currentPos = playerAudio.getPosition();
+		double totalLength = playerAudio.getLength();
+		double newPos = juce::jmin(totalLength, currentPos + 10.0);
+		playerAudio.setPosition(newPos);
 	}
 	else if (button == &loopButton) {
 
