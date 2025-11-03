@@ -34,6 +34,8 @@ private:
     juce::TextButton muteButton{ "Mute" };
     juce::TextButton loopButton{ "Loop" };
     juce::ShapeButton playPauseButton, goToStartButton, goToEndButton;
+    juce::TextButton backward10sButton{ "<< 10s" };
+    juce::TextButton forward10sButton{ "10s >>" };
 
     juce::Slider speedSlider;
     juce::Label speedLabel;
