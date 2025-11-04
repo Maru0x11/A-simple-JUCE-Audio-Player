@@ -153,13 +153,19 @@ juce::StringArray PlayerAudio::getFilesNames() {
     return filesNames;
 }
 juce::File PlayerAudio::getFile(int rowNumber) {
+    currentRowNumber = rowNumber;
     return playlistfiles[rowNumber];
 }
 void PlayerAudio::deleteTrack(int rowNumber) {
     filesNames.remove(rowNumber);
     playlistfiles.remove(rowNumber);
 }
-
+int PlayerAudio::getCurrentRowNumber() {
+    return currentRowNumber;
+}
+int PlayerAudio::getPlaylistSize() {
+    return filesNames.size();
+}
 void PlayerAudio::setPlaybackSpeed(float speed)
 {
     currentSpeed = speed;

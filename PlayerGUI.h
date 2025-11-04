@@ -19,6 +19,7 @@ public:
     void releaseResources();
     juce::ShapeButton createShapeButton(const juce::String& name);
     juce::Path CreateButtonShape(const juce::String& name);
+    void loadFromPlaylist(int rowNumber);
     //======================================
     int getNumRows()override;
     void paintRowBackground(juce::Graphics& g, int rowNumber, int width, int height, bool rowIsSelected)override;
@@ -35,8 +36,10 @@ private:
     juce::TextButton muteButton{ "Mute" };
     juce::TextButton loopButton{ "Load" };
     juce::ShapeButton playPauseButton, goToStartButton, goToEndButton;
-    juce::TextButton backward10sButton{ "<<" };   // New
+    juce::TextButton backward10sButton{ "<<" };   
     juce::TextButton forward10sButton{ ">>" };
+    juce::TextButton loadNext{ ">>|" };   
+    juce::TextButton loadPrev{ "|<<" };
 
     juce::Slider speedSlider;
     juce::Label speedLabel;

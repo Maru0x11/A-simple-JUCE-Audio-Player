@@ -20,11 +20,11 @@ PlayerGUI::PlayerGUI() :
 	customLookAndFeel.setColour(juce::ScrollBar::thumbColourId, juce::Colours::black);
 	setLookAndFeel(&customLookAndFeel);
 
-	std::array<juce::Button*, 12> buttons = {  
+	std::array<juce::Button*, 14> buttons = {
 		&loadButton, &muteButton,
 		&playPauseButton, &goToStartButton, &goToEndButton,
 		&loopButton,&addToPlaylist, &setMarkerAButton,&setMarkerBButton,&clearMarkersButton,
-		&backward10sButton,&forward10sButton 
+		&backward10sButton,&forward10sButton,& loadNext,& loadPrev
 	};
 
 	for (auto* btn : buttons)
@@ -121,37 +121,39 @@ void PlayerGUI::releaseResources()
 }
 void PlayerGUI::resized() {
 	int w = 60; int h = 20;int mid = (getWidth()) / 2;
-	loadButton.setBounds(0, getHeight()/3+10, w, h);
-	muteButton.setBounds(mid/2 , getHeight() / 2 + 10, w, h);
-	loopButton.setBounds(3*mid/2, getHeight() / 2 + 10, w, h);
+	loadButton.setBounds(0, getHeight() / 3 + 10, w, h);
+	muteButton.setBounds(mid - 300, getHeight() / 2 + 10, w, h);
+	loopButton.setBounds(mid + 210, getHeight() / 2 + 10, w, h);
 
+	loadPrev.setBounds(mid - 140, getHeight() / 2 + 10 + 5, w / 2, h);
 	goToStartButton.setBounds(mid - 100, getHeight() / 2 + 10 + 5, 20, 20);
-	backward10sButton.setBounds(mid - 70, getHeight() / 2 + 10 + 5, w/2, h);
-	playPauseButton.setBounds(mid - 15 , getHeight() / 2 + 10, 30, 30);
-	forward10sButton.setBounds(mid + 40, getHeight() / 2 + 10 + 5, w/2, h);
-	goToEndButton.setBounds(mid + 80 , getHeight() / 2 + 10 + 5, 20, 20);
+	backward10sButton.setBounds(mid - 70, getHeight() / 2 + 10 + 5, w / 2, h);
+	playPauseButton.setBounds(mid - 15, getHeight() / 2 + 10, 30, 30);
+	forward10sButton.setBounds(mid + 40, getHeight() / 2 + 10 + 5, w / 2, h);
+	goToEndButton.setBounds(mid + 80, getHeight() / 2 + 10 + 5, 20, 20);
+	loadNext.setBounds(mid + 110, getHeight() / 2 + 10 + 5, w / 2, h);
 
 	// ===========================================
 	int positionY = getHeight() / 2 + 30;
 	int positionX = 0;
 
-	positionLabel.setBounds(positionX, 15*getHeight()/24 -10, w, h);
-	durationLabel.setBounds(getWidth()-w-5, 15 * getHeight()/ 24 - 10, w, h);
+	positionLabel.setBounds(positionX, 15 * getHeight() / 24 - 10, w, h);
+	durationLabel.setBounds(getWidth() - w - 5, 15 * getHeight() / 24 - 10, w, h);
 	positionSlider.setBounds(positionX, 15 * getHeight() / 24, getWidth() - positionX, 30);
 
-	speedSlider.setBounds(mid + 100 , positionY, mid-100, 30);
+	speedSlider.setBounds(mid + 100, positionY, mid - 100, 30);
 
-	volumeslider.setBounds(50, positionY, mid-100, 30);
+	volumeslider.setBounds(50, positionY, mid - 100, 30);
 
-	addToPlaylist.setBounds(w+10, getHeight() / 3 + 10, w, h);
-	PlaylistBox.setBounds(0,2*getHeight()/3+50, getWidth(), getHeight() / 3 -50);
+	addToPlaylist.setBounds(w + 10, getHeight() / 3 + 10, w, h);
+	PlaylistBox.setBounds(0, 2 * getHeight() / 3 + 50, getWidth(), getHeight() / 3 - 50);
 
 	// ===========================================
 
-	int markerY = 15 * getHeight() / 24+40;
-	setMarkerAButton.setBounds(mid-70, markerY, w, h);
+	int markerY = 15 * getHeight() / 24 + 40;
+	setMarkerAButton.setBounds(mid - 70, markerY, w, h);
 	setMarkerBButton.setBounds(mid, markerY, w, h);
-	clearMarkersButton.setBounds(mid+70, markerY, w, h);
+	clearMarkersButton.setBounds(mid + 70, markerY, w, h);
 	//******************************************************************************
 	metadataTextEditor.setColour(juce::TextEditor::textColourId, juce::Colours::deepskyblue);
 	metadataTextEditor.setColour(juce::TextEditor::backgroundColourId, juce::Colours::black);
@@ -166,7 +168,7 @@ void PlayerGUI::resized() {
 	metadataViewPort.setScrollBarsShown(true, true);
 
 	metadataViewPort.setViewedComponent(&metadataTextEditor, false);
-	metadataViewPort.setBounds(mid/2, getHeight() / 3 + 10, mid, 70);
+	metadataViewPort.setBounds(mid / 2, getHeight() / 3 + 10, mid, 70);
 	//****************************************************************************
 }
 void PlayerGUI::buttonClicked(juce::Button* button)
@@ -269,7 +271,22 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 		hasMarkerB = false;
 		repaint();
 	}
-
+	else if (button == &loadPrev) {
+		int currRowNum = playerAudio.getCurrentRowNumber();
+		if (currRowNum > 0) {
+			playerAudio.setPlayerState(false);
+			repaint();
+			loadFromPlaylist(currRowNum - 1);
+		}
+	}
+	else if (button == &loadNext) {
+		int currRowNum = playerAudio.getCurrentRowNumber();
+		if (currRowNum >= 0 && playerAudio.getPlaylistSize() > currRowNum + 1) {
+			playerAudio.setPlayerState(false);
+			repaint();
+			loadFromPlaylist(currRowNum + 1);
+		}
+	}
 	else {
 		juce::String buttonID = button->getComponentID();
 		juce::StringArray IDParts = juce::StringArray::fromTokens(buttonID, ":", "");
@@ -281,18 +298,22 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 				PlaylistBox.repaint();
 			}
 			else if (IDParts[1] == "load") {
-				juce::File file = playerAudio.getFile(rowNumber);
-				playerAudio.LoadFile(file);
-				thumbnail.setSource(new juce::FileInputSource(file));
-				//***************************************
-				playerAudio.readMetadata(file);
-				metadataText = playerAudio.getMetadata();
-				metadataTextEditor.setText(metadataText);
-				//**************************************
+				loadFromPlaylist(rowNumber);
 			}
 		}
 	}
 }
+void PlayerGUI::loadFromPlaylist(int rowNumber) {
+	juce::File file = playerAudio.getFile(rowNumber);
+	playerAudio.LoadFile(file);
+	thumbnail.setSource(new juce::FileInputSource(file));
+	//***************************************
+	playerAudio.readMetadata(file);
+	metadataText = playerAudio.getMetadata();
+	metadataTextEditor.setText(metadataText);
+	//**************************************
+}
+
 void PlayerGUI::sliderValueChanged(juce::Slider* slider)
 {
 	if (slider == &volumeslider)
@@ -422,7 +443,7 @@ void PlayerGUI::paint(juce::Graphics& g) {
 	if (thumbnail.getTotalLength() > 0.0)
 	{
 		auto area = getLocalBounds();
-		auto waveformArea = juce::Rectangle<int>(0, 0, getWidth(),getHeight()/3);
+		auto waveformArea = juce::Rectangle<int>(0, 0, getWidth(), getHeight() / 3);
 
 		g.setColour(juce::Colours::lightblue);
 		thumbnail.drawChannels(g, waveformArea, 0.0, thumbnail.getTotalLength(), 1.0f);
@@ -493,7 +514,7 @@ void PlayerGUI::paint(juce::Graphics& g) {
 	}
 	if (playerAudio.getPlayerState()) {
 		playPauseButton.setShape(CreateButtonShape("pause"), true, true, true);
-		playPauseButton.setBounds((getWidth()/2) - 15, getHeight() / 2 + 10, 30, 30);
+		playPauseButton.setBounds((getWidth() / 2) - 15, getHeight() / 2 + 10, 30, 30);
 	}
 	else {
 		playPauseButton.setShape(CreateButtonShape("play"), true, true, true);
