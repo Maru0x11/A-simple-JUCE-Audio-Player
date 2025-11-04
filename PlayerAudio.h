@@ -29,8 +29,8 @@ public:
     juce::File getFile(int rowNumber);
     void deleteTrack(int rowNumber);
     //***********************************
-    /*void readMetadata(const juce::File& file);
-    juce::String getMetadata();*/
+    void readMetadata(const juce::File& file);
+    juce::String getMetadata();
     //***********************************
 
     void setPlaybackSpeed(float speed);
@@ -45,7 +45,6 @@ private:
 
     juce::ResamplingAudioSource resamplingSource;
     float currentSpeed = 1.0f;
-
     float previousVolume = 0.5f;
     bool isMuted = false;
     float previousPosition = 0.0f;
@@ -54,7 +53,7 @@ private:
     juce::Array<juce::String> filesNames;
     juce::Array<juce::File> playlistfiles;
     //*************************************
-    //juce::String metadata;
+    juce::String metadata;
     //*************************************
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerAudio)

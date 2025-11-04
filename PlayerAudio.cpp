@@ -1,7 +1,7 @@
 #include "PlayerAudio.h"
 //****************************************
-//#include <taglib/tag.h>
-//#include <taglib/fileref.h>
+#include <taglib/tag.h>
+#include <taglib/fileref.h>
 //****************************************
 PlayerAudio::PlayerAudio() : resamplingSource(&transportSource, false)
 {
@@ -178,32 +178,32 @@ juce::AudioFormatManager* PlayerAudio::getFormatManager()
     return &formatManager;
 }
 //***********************************************************************
-//void PlayerAudio::readMetadata(const juce::File& file) {
-//    metadata = "";
-//
-//    TagLib::FileName path = file.getFullPathName().toRawUTF8();
-//    TagLib::FileRef fileRef(path);
-//    if (!fileRef.isNull() && fileRef.tag()) {
-//        juce::String title = fileRef.tag()->title().toCString();
-//        juce::String artist = fileRef.tag()->artist().toCString();
-//        juce::String album = fileRef.tag()->album().toCString();
-//        juce::String genre = fileRef.tag()->genre().toCString();
-//        juce::String year = juce::String(fileRef.tag()->year());
-//        juce::String commet = fileRef.tag()->comment().toCString();
-//        juce::String track = juce::String(fileRef.tag()->track());
-//        if (title.isNotEmpty()) metadata += "Title: " + title + "\n";
-//        if (artist.isNotEmpty()) metadata += "Artist: " + artist + "\n";
-//        if (album.isNotEmpty()) metadata += "Album: " + album + "\n";
-//        if (genre.isNotEmpty()) metadata += "Genre: " + genre + "\n";
-//        if (year.isNotEmpty()) metadata += "Year: " + year + "\n";
-//        if (commet.isNotEmpty()) metadata += "Commet: " + commet + "\n";
-//        if (track.isNotEmpty()) metadata += "Track: " + track + "\n";
-//    }
-//    else {
-//        metadata += "Name: " + juce::String(file.getFileName());
-//    }
-//}
-//juce::String PlayerAudio::getMetadata() {
-//    return metadata;
-//}
+void PlayerAudio::readMetadata(const juce::File& file) {
+    metadata = "";
+
+    TagLib::FileName path = file.getFullPathName().toRawUTF8();
+    TagLib::FileRef fileRef(path);
+    if (!fileRef.isNull() && fileRef.tag()) {
+        juce::String title = fileRef.tag()->title().toCString();
+        juce::String artist = fileRef.tag()->artist().toCString();
+        juce::String album = fileRef.tag()->album().toCString();
+        juce::String genre = fileRef.tag()->genre().toCString();
+        juce::String year = juce::String(fileRef.tag()->year());
+        juce::String commet = fileRef.tag()->comment().toCString();
+        juce::String track = juce::String(fileRef.tag()->track());
+        if (title.isNotEmpty()) metadata += "Title: " + title + "\n";
+        if (artist.isNotEmpty()) metadata += "Artist: " + artist + "\n";
+        if (album.isNotEmpty()) metadata += "Album: " + album + "\n";
+        if (genre.isNotEmpty()) metadata += "Genre: " + genre + "\n";
+        if (year.isNotEmpty()) metadata += "Year: " + year + "\n";
+        if (commet.isNotEmpty()) metadata += "Commet: " + commet + "\n";
+        if (track.isNotEmpty()) metadata += "Track: " + track + "\n";
+    }
+    else {
+        metadata += "Name: " + juce::String(file.getFileName());
+    }
+}
+juce::String PlayerAudio::getMetadata() {
+    return metadata;
+}
 //***********************************************************************

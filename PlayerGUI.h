@@ -28,22 +28,23 @@ public:
     void paint(juce::Graphics& g) override;
 private:
     PlayerAudio playerAudio;
+    juce::LookAndFeel_V4 customLookAndFeel;
     // GUI elements
-    juce::TextButton loadButton{ "Load" };
+    juce::TextButton loadButton{ "+Player" };
     juce::Slider volumeslider;
     juce::TextButton muteButton{ "Mute" };
-    juce::TextButton loopButton{ "Loop" };
+    juce::TextButton loopButton{ "Load" };
     juce::ShapeButton playPauseButton, goToStartButton, goToEndButton;
-    juce::TextButton backward10sButton{ "<< 10s" };   // New
-    juce::TextButton forward10sButton{ "10s >>" };    // New
+    juce::TextButton backward10sButton{ "<<" };   // New
+    juce::TextButton forward10sButton{ ">>" };
 
     juce::Slider speedSlider;
     juce::Label speedLabel;
-
+    juce::Label volumeLabel;
     //==================================
     juce::TableListBox PlaylistBox;
     std::unique_ptr<juce::FileChooser> fileChooser;
-    juce::TextButton addToPlaylist{ "Add" };
+    juce::TextButton addToPlaylist{ "+Playlist" };
     //==================================
     juce::Slider positionSlider;
     juce::Label positionLabel;
@@ -60,13 +61,14 @@ private:
     juce::TextButton clearMarkersButton{ "Clear Markers" };
 
     //*********************************
-    /*juce::TextEditor metadataTextEditor;
+    juce::TextEditor metadataTextEditor;
     juce::String metadataText;
-    juce::Viewport metadataViewPort;*/
+    juce::Viewport metadataViewPort;
     // *********************************
     juce::AudioThumbnailCache thumbnailCache{ 1 };
     juce::AudioThumbnail thumbnail{ 512, *playerAudio.getFormatManager(), thumbnailCache };
 
+    int tableW = 50;
     // Event handlers
     void buttonClicked(juce::Button* button) override;
     void sliderValueChanged(juce::Slider* slider) override;

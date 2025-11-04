@@ -26,12 +26,12 @@ private:
     public:
         MainWindow(juce::String name)
             : DocumentWindow(name,
-                juce::Colours::lightgrey,
+                juce::Colours:: black,
                 DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar(true);
             setContentOwned(new MainComponent(), true);  // MainComponent = our UI + logic
-            centreWithSize(600, 500);
+            centreWithSize(800, 520);
             setVisible(true);
         }
 
