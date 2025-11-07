@@ -21,7 +21,6 @@ public:
     void togglePlayer();
     bool getPlayerState();
     void setPlayerState(bool state);
-    void setPreviousPosition(float pos);
     void toggleLooping();
     bool getLoopState() const;
     void addToPlaylist(const juce::File& file);
@@ -48,7 +47,6 @@ private:
     float currentSpeed = 1.0f;
     float previousVolume = 0.5f;
     bool isMuted = false;
-    float previousPosition = 0.0f;
     bool isPlaying = false;
     bool isLooping = false;
     juce::Array<juce::String> filesNames;

@@ -28,8 +28,6 @@ bool PlayerAudio::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferTo
             transportSource.start();
         }
         else {
-            setPosition(0.0f);
-            previousPosition = 0.0f;
             if (transportSource.getLengthInSeconds() > 0) return true;
             else return false;
         }
@@ -116,12 +114,15 @@ void PlayerAudio::togglePlayer() {
     if (isPlaying) {
         isPlaying = false;
         transportSource.stop();
-        previousPosition = transportSource.getCurrentPosition();
-        transportSource.setPosition(0.0);
     }
     else {
         isPlaying = true;
-        transportSource.setPosition(previousPosition);
+        if (transportSource.getCurrentPosition() >= transportSource.getLengthInSeconds() - 1) {
+            transportSource.setPosition(0.0f);
+        }
+        else {
+            transportSource.setPosition(transportSource.getCurrentPosition());
+        }
         transportSource.start();
     }
 }
@@ -130,9 +131,6 @@ bool PlayerAudio::getPlayerState() {
 }
 void PlayerAudio::setPlayerState(bool state) {
     isPlaying = state;
-}
-void PlayerAudio::setPreviousPosition(float pos) {
-    previousPosition = pos;
 }
 void PlayerAudio::toggleLooping()
 {

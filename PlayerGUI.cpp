@@ -109,7 +109,7 @@ void PlayerGUI::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 }
 void PlayerGUI::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
-	if (playerAudio.getNextAudioBlock(bufferToFill)) {
+	if (playerAudio.getNextAudioBlock(bufferToFill) && playerAudio.getPlayerState()) {
 		juce::MessageManager::callSync([this]() {
 			buttonClicked(&playPauseButton);
 			});
@@ -205,11 +205,9 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 	}
 	else if (button == &goToStartButton) {
 		playerAudio.setPosition(0.0f);
-		playerAudio.setPreviousPosition(0.0f);
 	}
 	else if (button == &goToEndButton) {
 		playerAudio.setPosition(playerAudio.getLength());
-		playerAudio.setPreviousPosition(0.0f);
 	}
 	else if (button == &loopButton) {
 
